@@ -12,4 +12,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         delProp: function(name) {
         }
     });
+
+    ns.extend({
+        'Schema': Schema
+    });
 });
