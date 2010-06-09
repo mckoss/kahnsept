@@ -1,6 +1,15 @@
 namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
+    var currentWorld;
 
-    function Schema(name) {
+    function World() {
+        currentWorld = this;
+    }
+
+    function Schema(name, world) {
+        if (world == undefined) {
+            world = currentWorld;
+        }
+        this.world = world;
         this.name = name;
         this.props = {};
     }
@@ -16,9 +25,6 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     }
 
     function Relationship() {
-    }
-
-    function World() {
     }
 
     Schema.methods({
