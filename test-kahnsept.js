@@ -34,10 +34,10 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(s.props['prop1'].name, 'prop1');
 
             s.delProp('prop1');
-            ut.assertEq(base.keys(s.prop).length, 0);
+            ut.assertEq(base.keys(s.props).length, 0);
         });
 
-        ts.addTest("Property", function(ut) {
+        ts.addTest("BuiltIn", function(ut) {
 
         });
     }
