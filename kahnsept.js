@@ -23,6 +23,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     Schema.methods({
         addProp: function (name, type) {
+            if (typeof type != 'string') {
+                throw new Error("Invalid type: " + type);
+            }
+
             var prop = this.props[name];
             if (prop) {
                 throw new Error("Property " + name + " exists.");

@@ -21,13 +21,24 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(s.name, 'test');
             ut.assertEq(base.keys(s.props).length, 0);
 
-            s.addProp('prop1');
+            // Expect Errors
+            try {
+                s.addProp('prop1');
+            } catch (e) {
+                ut.assertException(e, "Invalid type");
+            }
+
+            s.addProp('prop1', 'string');
             ut.assertEq(base.keys(s.props).length, 1);
             ut.assert(s.props['prop1'] instanceof kahnsept.Property);
             ut.assertEq(s.props['prop1'].name, 'prop1');
 
             s.delProp('prop1');
             ut.assertEq(base.keys(s.prop).length, 0);
+        });
+
+        ts.addTest("Property", function(ut) {
+
         });
     }
 
