@@ -3,9 +3,19 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     function World() {
         currentWorld = this;
+
+        this.schemas = {};
+
+        this.instances = [];
+        this.idNext = 0;
+
+        this.init();
     }
 
     function Schema(name, world) {
+        if (typeof name != 'string') {
+            throw new Error("Invalid schema name: " + name);
+        }
         if (world == undefined) {
             world = currentWorld;
         }
@@ -18,14 +28,46 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         this.name = name;
     }
 
-    function BuiltIn() {
+    function BuiltIn(name, world) {
+        Schema.call(this, name, world);
     }
+
+    BuiltIn.prototype = new Schema('dummy');
+    BuiltIn.types = {
+        'number': Number,
+        'string': String,
+        'bool': Boolean,
+        'date': Date
+    };
 
     function Instance() {
     }
 
     function Relationship() {
     }
+
+    World.methods({
+        init: function() {
+            for (var type in BuiltIn.types) {
+                if (BuiltIn.types.hasOwnProperty(type)) {
+                    this.addSchema(new BuiltIn(type));
+                }
+            }
+        },
+
+        addSchema: function(schema) {
+            if (!(schema instanceof Schema)) {
+                throw new Error("Invalid schema: " + schema);
+            }
+
+            var s = this.schemas[schema.name];
+            if (s != undefined) {
+                throw new Error("Schema " + schema.name + " exists.");
+            }
+
+            this.schemas[schema.name] = schema;
+        }
+    });
 
     Schema.methods({
         addProp: function (name, type) {

@@ -16,7 +16,17 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             }
         });
 
+        ts.addTest("World", function(ut) {
+            var w = new kahnsept.World();
+            ut.assert(w != undefined);
+
+            var s = new kahnsept.Schema('test');
+
+            ut.assertIdent(s.world, w);
+        });
+
         ts.addTest("Schema", function(ut) {
+            var w = new kahnsept.World();
             var s = new kahnsept.Schema('test');
             ut.assertEq(s.name, 'test');
             ut.assertEq(base.keys(s.props).length, 0);
@@ -38,7 +48,10 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
         });
 
         ts.addTest("BuiltIn", function(ut) {
-
+            var b = new kahnsept.BuiltIn('string');
+            ut.assertEq(typeof b, 'object');
+            ut.assert(b instanceof kahnsept.BuiltIn);
+            ut.assert(b instanceof kahnsept.Schema);
         });
     }
 
