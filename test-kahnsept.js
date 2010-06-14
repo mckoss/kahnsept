@@ -108,6 +108,34 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             }
             ut.assert(fThrows);
         });
+
+        ts.addTest("Property type conversion", function(ut) {
+            var w = new kahnsept.World();
+            var s = new kahnsept.Schema('test');
+            s.addProp("s1", "string");
+            s.addProp("n1", "number");
+            s.addProp("b1", "boolean");
+            s.addProp("d1", "date");
+
+            var obj = s.createInstance();
+
+            obj.setProp("s1", 1);
+            ut.assertEq(typeof obj.s1, 'string');
+            ut.assertEq(obj.s1, "1");
+
+            obj.setProp("n1", "1.23");
+            ut.assertEq(typeof obj.n1, 'number');
+            ut.assertEq(obj.n1, 1.23);
+
+            obj.setProp("b1", "true");
+            ut.assertEq(typeof obj.b1, 'boolean');
+            ut.assertEq(obj.b1, true);
+
+            obj.setProp("d1", "1/1/2010");
+            ut.assertEq(typeof obj.d1, 'object');
+            ut.assertEq(obj.d1.constructor, 'Date');
+            ut.assertEq(obj.d1.getTime(), (new Date("1/1/2010")).getTime());
+        });
     }
 
     ns.addTests = addTests;
