@@ -65,6 +65,20 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             // Builtins are Schemas as well
             ut.assert(b instanceof kahnsept.Schema);
         });
+
+        ts.addTest("Instances", function(ut) {
+            var w = new kahnsept.World();
+            var s = new kahnsept.Schema('test');
+            s.addProp("s1", "string");
+            s.addProp("n1", "number");
+
+            var obj = s.createInstance();
+            obj.setProp("s1", "hello");
+            ut.assertEq(obj.s1, "hello");
+            obj.setProp("n1", 7);
+            ut.assertEq(obj.n1, 7);
+            ut
+        });
     }
 
     ns.addTests = addTests;
