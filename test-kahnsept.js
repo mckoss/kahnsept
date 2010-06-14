@@ -136,6 +136,59 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(obj.d1.constructor, Date);
             ut.assertEq(obj.d1.getTime(), (new Date("1/1/2010")).getTime());
         });
+
+        ts.addTest("Complex Schema", function(ut) {
+            var w = new kahnsept.World();
+            var coord = new kahnsept.Schema('coordinate');
+            coord.addProp("x", "number");
+            coord.addProp("y", "number");
+
+            var t = new kahnsept.Schema('test');
+            t.addProp("p1", "coordinate");
+
+            var t1 = t.createInstance();
+            t1.setProp('p1', {'x': 10, 'y': 20});
+            ut.assertEq(typeof t1.p1, 'object');
+            ut.assertEq(t1.p1.name, 'coordinate');
+            ut.assertEq(typeof t1.p1.x, 'number');
+            ut.assertEq(t1.p1.x, 10);
+            ut.assertEq(typeof t1.p1.y, 'number');
+            ut.assertEq(t1.p1.y, 20);
+        });
+
+        ts.addTest("Default properties", function(ut) {
+            var w = new kahnsept.World();
+            var coord = new kahnsept.Schema('coordinate');
+            coord.addProp("x", "number");
+            coord.addProp("y", "number");
+
+            var s = new kahnsept.Schema('test');
+            s.addProp("s1", "string", "default");
+            s.addProp("n1", "number", 123);
+            s.addProp("b1", "boolean", false);
+            s.addProp("d1", "date", new Date("1/1/2010"));
+            s.addProp("c1", "coordinate", {'x': 10, 'y': 20});
+
+            var obj = s.createInstance();
+
+            ut.assertEq(typeof obj.s1, 'string');
+            ut.assertEq(obj.s1, "default");
+
+            ut.assertEq(typeof obj.n1, 'number');
+            ut.assertEq(obj.n1, 123);
+
+            ut.assertEq(typeof obj.b1, 'boolean');
+            ut.assertEq(obj.b1, false);
+
+            ut.assertEq(typeof obj.d1, 'object');
+            ut.assertEq(obj.d1.constructor, Date);
+            ut.assertEq(obj.d1.getTime(), (new Date("1/1/2010")).getTime());
+
+            ut.assertEq(typeof obj.c1, 'object');
+            ut.assertEq(obj.c1.type, 'coordinate');
+            ut.assertEq(obj.c1.x, 10);
+            ut.assertEq(obj.c1.y, 20);
+        });
     }
 
     ns.addTests = addTests;

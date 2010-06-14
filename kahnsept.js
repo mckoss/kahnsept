@@ -102,18 +102,18 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("Property " + name + " does not exist.");
             }
             if (this._schema.props[name].type == "string") {
-            	value = value.toString();
+                value = value.toString();
             }
             if (this._schema.props[name].type == "number") {
-            	value = parseFloat(value);
+                value = parseFloat(value);
             }
             if (this._schema.props[name].type == "boolean") {
-            	value = Boolean(value);
+                value = Boolean(value);
             }
             if (this._schema.props[name].type == "date") {
-            	value = new Date(value);
+                value = new Date(value);
             }
-            	
+
             this[name] = value;
         }
     });
