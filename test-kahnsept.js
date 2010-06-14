@@ -133,7 +133,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
             obj.setProp("d1", "1/1/2010");
             ut.assertEq(typeof obj.d1, 'object');
-            ut.assertEq(obj.d1.constructor, 'Date');
+            ut.assertEq(obj.d1.constructor, Date);
             ut.assertEq(obj.d1.getTime(), (new Date("1/1/2010")).getTime());
         });
     }
