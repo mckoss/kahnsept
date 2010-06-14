@@ -119,7 +119,7 @@ namespace.lookup('com.pageforest.examples.kahnsept').defineOnce(function (ns) {
     
     function addSchema() {
     	saveText();
-    	schemas.push({ "title": "NewSchema", "props": new Array(), "instances": new Array(), "expanded": true, "instexp": true});
+    	schemas.push({ "title": "NewSchema", "props": new Array({"propname" : "Title" , "accepted" : "Text"}), "instances": new Array(), "expanded": true, "instexp": true});
 		displaySchema();
     }
     
