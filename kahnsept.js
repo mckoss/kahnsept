@@ -24,8 +24,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         this.props = {};
     }
 
-    function Property(name) {
+    function Property(name, type) {
         this.name = name;
+        this.type = type;
     }
 
     function BuiltIn(name, world) {
@@ -81,7 +82,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("Property " + name + " exists.");
             }
 
-            this.props[name] = new Property(name);
+            this.props[name] = new Property(name, type);
         },
 
         delProp: function(name) {
@@ -100,6 +101,19 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (this._schema.props[name] == undefined) {
                 throw new Error("Property " + name + " does not exist.");
             }
+            if (this._schema.props[name].type == "string") {
+            	value = value.toString();
+            }
+            if (this._schema.props[name].type == "number") {
+            	value = parseFloat(value);
+            }
+            if (this._schema.props[name].type == "boolean") {
+            	value = Boolean(value);
+            }
+            if (this._schema.props[name].type == "date") {
+            	value = new Date(value);
+            }
+            	
             this[name] = value;
         }
     });
