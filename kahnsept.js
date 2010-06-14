@@ -41,7 +41,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     };
 
     function Instance(schema) {
-    	this._schema = schema;
+        this._schema = schema;
     }
 
     function Relationship() {
@@ -87,21 +87,21 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         delProp: function(name) {
             delete this.props[name];
         },
-        
+
         createInstance: function () {
-        	var i = new Instance(this)
-        	this.world.instances.push(i);
-        	return i;
+            var i = new Instance(this);
+            this.world.instances.push(i);
+            return i;
         }
     });
-    
+
     Instance.methods({
-    	setProp: function (name, value){
-    		if (this._schema.props[name] == undefined) {
-    			throw new Error("Parent schema doesn't have this property.");
-    		}
-    		this[name] = value;
-    	}
+        setProp: function (name, value) {
+            if (this._schema.props[name] == undefined) {
+                throw new Error("Property " + name + " does not exist.");
+            }
+            this[name] = value;
+        }
     });
 
     ns.extend({

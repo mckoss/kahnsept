@@ -37,11 +37,14 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
             // Expect Errors - Test - Properties cannot be added without
             // type
+            var fThrows = false;
             try {
                 s.addProp('prop1');
             } catch (e) {
+                fThrows = true;
                 ut.assertException(e, "Invalid type");
             }
+            ut.assert(fThrows);
 
             s.addProp('prop1', 'string');
             // Property successfuly added
@@ -71,14 +74,39 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var s = new kahnsept.Schema('test');
             s.addProp("s1", "string");
             s.addProp("n1", "number");
+            s.addProp("b1", "boolean");
+            s.addProp("d1", "date");
 
             var obj = s.createInstance();
             ut.assertEq(typeof obj, 'object');
             ut.assert(obj instanceof kahnsept.Instance);
+
             obj.setProp("s1", "hello");
+            ut.assertEq(typeof obj.s1, 'string');
             ut.assertEq(obj.s1, "hello");
+
             obj.setProp("n1", 7);
+            ut.assertEq(typeof obj.n1, 'number');
             ut.assertEq(obj.n1, 7);
+
+            obj.setProp("b1", true);
+            ut.assertEq(typeof obj.b1, 'boolean');
+            ut.assertEq(obj.b1, true);
+
+            var d = new Date();
+            obj.setProp("d1", d);
+            ut.assertEq(typeof obj.d1, 'object');
+            ut.assertIdent(obj.d1.constructor, Date);
+            ut.assertEq(obj.d1.getTime(), d.getTime());
+
+            var fThrows = false;
+            try {
+                obj.setProp("missing", 1);
+            } catch (e) {
+                fThrows = true;
+                ut.assertException(e, "does not exist");
+            }
+            ut.assert(fThrows);
         });
     }
 
