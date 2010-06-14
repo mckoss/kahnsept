@@ -73,11 +73,12 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             s.addProp("n1", "number");
 
             var obj = s.createInstance();
+            ut.assertEq(typeof obj, 'object');
+            ut.assert(obj instanceof kahnsept.Instance);
             obj.setProp("s1", "hello");
             ut.assertEq(obj.s1, "hello");
             obj.setProp("n1", 7);
             ut.assertEq(obj.n1, 7);
-            ut
         });
     }
 
