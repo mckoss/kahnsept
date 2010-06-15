@@ -51,7 +51,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     BuiltIn.types = {
         'number': Number,
         'string': String,
-        'bool': Boolean,
+        'boolean': Boolean,
         'date': Date
     };
 
@@ -61,23 +61,43 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     // Relationship is created from two schemas, cardinalities
     // and "tags" (property names).
-    // Call: new Relationship([leftSchema, rightSchema],
-    //                        [leftCard, rightCard],
-    //                        [leftTag, rightTag])
-    function Relationship(schemaNames, cards, names) {
+    function Relationship(schemaNames, names, cards) {
+        var i;
+
         this.schemaNames = schemaNames;
         this.cards = cards;
         this.names = names;
 
         // The name for each property
-        for (var i = 0; i < 2; i++) {
+        for (i = 0; i < 2; i++) {
             if (this.names[i] == undefined) {
                 this.names[i] = this.schemaNames[1 - i];
             }
         }
 
+        var props = [];
+        var schemas = [];
+        try {
+            for (i = 0; i < 2; i++) {
+                schemas[i] = currentWorld.schemas[this.schemaNames[i]];
+                if (schemas[i] == undefined) {
+                    throw new Error("Invalid schema: " + this.schemaNames[i]);
+                }
+                props[i] = new Property(this.names[i],
+                                        this.schemaNames[1 - i],
+                                        undefined,
+                                        this.cards[i]);
 
-
+                schemas[i]._addProp(this.names[i], props[i]);
+            }
+        } catch (e) {
+            for (i = 0; i < 2; i++) {
+                if (props[i]) {
+                    schemas[i].delProp(this.names[i]);
+                }
+            }
+            throw e;
+        }
     }
 
     World.methods({
@@ -101,22 +121,40 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             this.schemas[schema.name] = schema;
             schema.world = this;
+        },
+
+        inverseCard: function(card) {
+            if (card == 'one') {
+                return 'many';
+            } else if (card == 'many') {
+                return 'one';
+            }
+            return undefined;
         }
     });
 
     Schema.methods({
-        addProp: function (name, schemaName, defaultValue, card) {
-            if (typeof schemaName != 'string') {
-                throw new Error("Invalid schema name: " + schemaName);
+        addProp: function(name, schemaName, defaultValue, card) {
+            var schema = this.world.schemas[schemaName];
+            if (schema instanceof BuiltIn) {
+                var prop = new Property(name, schemaName,
+                                        defaultValue, card);
+                this._addProp(name, prop);
             }
+            else {
+                new Relationship([this.name, schemaName],
+                                 [name, undefined],
+                                 [card, this.world.inverseCard(card)]);
+            }
+            return this.props[name];
+        },
 
-            var prop = this.props[name];
-            if (prop) {
+        _addProp: function (name, prop) {
+            if (this.props[name]) {
                 throw new Error("Property " + name + " exists.");
             }
 
-            this.props[name] = new Property(name, schemaName,
-                                            defaultValue, card);
+            this.props[name] = prop;
         },
 
         delProp: function(name) {

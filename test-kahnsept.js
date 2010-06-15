@@ -146,6 +146,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var coord = new kahnsept.Schema('coordinate');
             coord.addProp("x", "number");
             coord.addProp("y", "number");
+            console.log(coord);
 
             var t = new kahnsept.Schema('test');
             t.addProp("p1", "coordinate");
