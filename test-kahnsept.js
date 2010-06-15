@@ -39,7 +39,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             // type
             var fThrows = false;
             try {
-                s.addProp('prop1');
+                s.addProp('prop1', 'bogus');
             } catch (e) {
                 fThrows = true;
                 ut.assertException(e, "Invalid schema");
@@ -193,6 +193,42 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(obj.c1._schema.name, 'coordinate');
             ut.assertEq(obj.c1.x, 10);
             ut.assertEq(obj.c1.y, 20);
+        });
+
+        ts.addTest("Kahnsept Video Demo", function(ut) {
+            var w = new kahnsept.World();
+            var person = new kahnsept.Schema('person');
+            person.addProp('name');
+            person.addProp('age', 'number');
+
+            var deb = person.createInstance();
+            deb.setProp('name', "Debbie");
+            deb.setProp('age', 29);
+
+            var mike = person.createInstance();
+            mike.setProp('name', "Mike");
+            mike.setProp('age', 49);
+
+            ut.assertEq(mike.name, "Mike");
+            ut.assert(mike.age > deb.age);
+
+            new kahnsept.Relationship(['husband', 'wife'],
+                                      [person, person],
+                                      undefined,
+                                      ['one', 'one']);
+
+            mike.setProp('wife', deb);
+            ut.assertIdent(mike.wife, deb);
+            ut.assertIdent(deb.husband, mike);
+
+            var fred = person.createInstance();
+            fred.setProp('name', "Fred");
+            fred.setProp('age', 21);
+
+            fred.setProp('wife', deb);
+            ut.assertIdent(fred.wife, deb);
+            ut.assertIdent(deb.husband, fred);
+            ut.assertIdent(mike.wife, undefined);
         });
     }
 
