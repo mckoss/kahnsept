@@ -29,10 +29,18 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     // A schema property definition:
     // name - The name of the property
     // type - The name of the schema
-    function Property(name, schemaName, defaultValue) {
+    function Property(name, schemaName, defaultValue, card) {
         this.name = name;
         this.schemaName = schemaName;
         this.defaultValue = defaultValue;
+        if (card == undefined) {
+            card = 'one';
+        }
+        this.card = card;
+
+        if (!(this.card == 'one' || this.card == 'many')) {
+            throw new Error("Invalid cardinality: " + card);
+        }
     }
 
     function BuiltIn(name, world) {
@@ -102,17 +110,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("Invalid schema name: " + schemaName);
             }
 
-            if (card == undefined) {
-                card = 'one';
-            }
-            this.card = card;
-
             var prop = this.props[name];
             if (prop) {
                 throw new Error("Property " + name + " exists.");
             }
 
-            this.props[name] = new Property(name, schemaName, defaultValue);
+            this.props[name] = new Property(name, schemaName,
+                                            defaultValue, card);
         },
 
         delProp: function(name) {
