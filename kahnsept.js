@@ -26,9 +26,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         this.props = {};
     }
 
-    function Property(name, type, defaultValue) {
+    // A schema property definition:
+    // name - The name of the property
+    // type - The name of the schema
+    function Property(name, schemaName, defaultValue) {
         this.name = name;
-        this.type = type;
+        this.schemaName = schemaName;
         this.defaultValue = defaultValue;
     }
 
@@ -48,7 +51,25 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         this._schema = schema;
     }
 
-    function Relationship() {
+    // Relationship is created from two schemas, cardinalities
+    // and "tags" (property names).
+    // Call: new Relationship([leftSchema, rightSchema],
+    //                        [leftCard, rightCard],
+    //                        [leftTag, rightTag])
+    function Relationship(schemaNames, cards, names) {
+        this.schemaNames = schemaNames;
+        this.cards = cards;
+        this.names = names;
+
+        // The name for each property
+        for (var i = 0; i < 2; i++) {
+            if (this.names[i] == undefined) {
+                this.names[i] = this.schemaNames[1 - i];
+            }
+        }
+
+
+
     }
 
     World.methods({
@@ -76,17 +97,22 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     });
 
     Schema.methods({
-        addProp: function (name, type, defaultValue) {
-            if (typeof type != 'string') {
-                throw new Error("Invalid type: " + type);
+        addProp: function (name, schemaName, defaultValue, card) {
+            if (typeof schemaName != 'string') {
+                throw new Error("Invalid schema name: " + schemaName);
             }
+
+            if (card == undefined) {
+                card = 'one';
+            }
+            this.card = card;
 
             var prop = this.props[name];
             if (prop) {
                 throw new Error("Property " + name + " exists.");
             }
 
-            this.props[name] = new Property(name, type, defaultValue);
+            this.props[name] = new Property(name, schemaName, defaultValue);
         },
 
         delProp: function(name) {
@@ -95,16 +121,17 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
         createInstance: function (values) {
             var i = new Instance(this);
+            var prop;
             this.world.instances.push(i);
 
-            for(var prop in this.props) {
-                if(this.props[prop].defaultValue != undefined) {
+            for (prop in this.props) {
+                if (this.props[prop].defaultValue != undefined) {
                     i.setProp(prop, this.props[prop].defaultValue);
                 }
             }
 
             if (values != undefined) {
-                for (var prop in values) {
+                for (prop in values) {
                     if (values.hasOwnProperty(prop)) {
                         i.setProp(prop, values[prop]);
                     }
@@ -116,11 +143,14 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     Instance.methods({
         setProp: function (name, value) {
-            if (this._schema.props[name] == undefined) {
+            var prop = this._schema.props[name];
+            if (prop == undefined) {
                 throw new Error("Property " + name + " does not exist.");
             }
-            var targetType = this._schema.props[name].type;
-            switch (targetType) {
+            var targetSchemaName = prop.schemaName;
+            // TODO: Call schema.setValue(this, name, value) so each
+            // schema class implements it's own setter function.
+            switch (targetSchemaName) {
             case 'string':
                 value = value.toString();
                 break;
@@ -135,23 +165,34 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 break;
             default:
                 if (value instanceof Instance) {
-                    if (value.type != targetType) {
+                    if (value.schemaName != targetSchemaName) {
                         throw new Error("Property type mismatch, " +
-                                        value.type +
-                                        " should be " + targetType + ".");
+                                        value.schemaName +
+                                        " should be " + targetSchemaName + ".");
                     }
                 }
                 else {
                     var world = this._schema.world;
-                    var schema = world.schemas[targetType];
+                    var schema = world.schemas[targetSchemaName];
                     if (schema == undefined) {
-                        throw new Error("Undefined schema: " + targetType);
+                        throw new Error("Undefined schema: " +
+                                        targetSchemaName);
                     }
                     value = schema.createInstance(value);
                 }
             }
 
-            this[name] = value;
+            if (prop.card == 'many') {
+                // TODO: Don't add duplicate values?
+                // How do we edit or delete a value in a 'many' property?
+                if (this[name] == undefined) {
+                    this[name] = [];
+                }
+                this[name].push(value);
+            }
+            else {
+                this[name] = value;
+            }
         }
     });
 

@@ -42,7 +42,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
                 s.addProp('prop1');
             } catch (e) {
                 fThrows = true;
-                ut.assertException(e, "Invalid type");
+                ut.assertException(e, "Invalid schema");
             }
             ut.assert(fThrows);
 
