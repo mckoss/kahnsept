@@ -127,6 +127,20 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(obj.d1.getTime(), (new Date("1/1/2010")).getTime());
         });
 
+        ts.addTest("Multi-valued properties", function(ut) {
+            var w = new kahnsept.World();
+            var s = new kahnsept.Schema('test');
+            s.addProp("s1", "string", undefined, 'many');
+
+            var obj = s.createInstance();
+
+            obj.setProp("s1", 'test');
+            ut.assertEq(obj.s1, ['test']);
+
+            obj.setProp("s1", 'test2');
+            ut.assertEq(obj.s1, ['test', 'test2']);
+        });
+
         ts.addTest("Complex Schema", function(ut) {
             var w = new kahnsept.World();
             var coord = new kahnsept.Schema('coordinate');
