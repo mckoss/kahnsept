@@ -19,6 +19,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         if (world == undefined) {
             world = currentWorld;
         }
+        if (world.schemas[name] != undefined) {
+            throw new Error("Duplicate schema name: " + name);
+        }
+        world.schemas[name] = this;
         this.world = world;
         this.name = name;
         this.props = {};
@@ -89,9 +93,17 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             delete this.props[name];
         },
 
-        createInstance: function () {
+        createInstance: function (values) {
             var i = new Instance(this);
             this.world.instances.push(i);
+            
+            if (values != undefined) {
+                for (var prop in values) {
+                    if (values.hasOwnProperty(prop)) {
+                        i.setProp(prop, values[prop]);
+                    }
+                }
+            }
             return i;
         }
     });
@@ -101,19 +113,32 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (this._schema.props[name] == undefined) {
                 throw new Error("Property " + name + " does not exist.");
             }
-            if (this._schema.props[name].type == "string") {
-                value = value.toString();
+            var targetType = this._schema.props[name].type;
+            switch (targetType) {
+            case 'string':
+            	value = value.toString();
+            	break;
+            case 'number':
+            	value = parseFloat(value);
+            	break;
+            case 'boolean':
+            	value = Boolean(value);
+            	break;
+            case 'date':
+            	value = new Date(value);
+            	break;
+            default:
+            	if (value instanceof Instance) {
+            		if (value.type != targetType) {
+            			throw new Error("Property type mismatch, " + value.type +
+            					" should be " + targetType + ".");
+            		}
+            	}
+            	else {
+            		value = currentWorld.schemas[targetType].createInstance(value);
+            	}
             }
-            if (this._schema.props[name].type == "number") {
-                value = parseFloat(value);
-            }
-            if (this._schema.props[name].type == "boolean") {
-                value = Boolean(value);
-            }
-            if (this._schema.props[name].type == "date") {
-                value = new Date(value);
-            }
-
+            
             this[name] = value;
         }
     });
