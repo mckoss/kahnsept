@@ -16,15 +16,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         if (typeof name != 'string') {
             throw new Error("Invalid schema name: " + name);
         }
+        this.name = name;
         if (world == undefined) {
             world = currentWorld;
         }
-        if (world.schemas[name] != undefined) {
-            throw new Error("Duplicate schema name: " + name);
+        if (world) {
+            world.addSchema(this);
         }
-        world.schemas[name] = this;
-        this.world = world;
-        this.name = name;
         this.props = {};
     }
 
@@ -56,7 +54,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         init: function() {
             for (var type in BuiltIn.types) {
                 if (BuiltIn.types.hasOwnProperty(type)) {
-                    this.addSchema(new BuiltIn(type));
+                    new BuiltIn(type, this);
                 }
             }
         },
@@ -72,6 +70,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             this.schemas[schema.name] = schema;
+            schema.world = this;
         }
     });
 
@@ -96,7 +95,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         createInstance: function (values) {
             var i = new Instance(this);
             this.world.instances.push(i);
-            
+
             if (values != undefined) {
                 for (var prop in values) {
                     if (values.hasOwnProperty(prop)) {
@@ -116,29 +115,35 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var targetType = this._schema.props[name].type;
             switch (targetType) {
             case 'string':
-            	value = value.toString();
-            	break;
+                value = value.toString();
+                break;
             case 'number':
-            	value = parseFloat(value);
-            	break;
+                value = parseFloat(value);
+                break;
             case 'boolean':
-            	value = Boolean(value);
-            	break;
+                value = Boolean(value);
+                break;
             case 'date':
-            	value = new Date(value);
-            	break;
+                value = new Date(value);
+                break;
             default:
-            	if (value instanceof Instance) {
-            		if (value.type != targetType) {
-            			throw new Error("Property type mismatch, " + value.type +
-            					" should be " + targetType + ".");
-            		}
-            	}
-            	else {
-            		value = currentWorld.schemas[targetType].createInstance(value);
-            	}
+                if (value instanceof Instance) {
+                    if (value.type != targetType) {
+                        throw new Error("Property type mismatch, " +
+                                        value.type +
+                                        " should be " + targetType + ".");
+                    }
+                }
+                else {
+                    var world = this._schema.world;
+                    var schema = world.schemas[targetType];
+                    if (schema == undefined) {
+                        throw new Error("Undefined schema: " + targetType);
+                    }
+                    value = schema.createInstance(value);
+                }
             }
-            
+
             this[name] = value;
         }
     });
