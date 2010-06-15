@@ -26,9 +26,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         this.props = {};
     }
 
-    function Property(name, type) {
+    function Property(name, type, defaultValue) {
         this.name = name;
         this.type = type;
+        this.defaultValue = defaultValue;
     }
 
     function BuiltIn(name, world) {
@@ -75,7 +76,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     });
 
     Schema.methods({
-        addProp: function (name, type) {
+        addProp: function (name, type, defaultValue) {
             if (typeof type != 'string') {
                 throw new Error("Invalid type: " + type);
             }
@@ -85,7 +86,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("Property " + name + " exists.");
             }
 
-            this.props[name] = new Property(name, type);
+            
+            
+            this.props[name] = new Property(name, type, defaultValue);
         },
 
         delProp: function(name) {
@@ -96,6 +99,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var i = new Instance(this);
             this.world.instances.push(i);
 
+            for(var prop in this.props) {
+            	if(this.props[prop].defaultValue != undefined) {
+            		i.setProp(prop, this.props[prop].defaultValue);
+            	}
+            }
+            
             if (values != undefined) {
                 for (var prop in values) {
                     if (values.hasOwnProperty(prop)) {
