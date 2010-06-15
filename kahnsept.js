@@ -27,8 +27,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     }
 
     // A schema property definition:
-    // name - The name of the property
-    // type - The name of the schema
+    // defaultValue can be one of:
+    //   undefined
+    //   Instance - shared by all instances that have this property
+    //   object initializer (e.g., {'x': 1, 'y': 2}) - used to initialize
+    //     a private copy of the property instance.
     function Property(name, schemaName, defaultValue, card) {
         this.name = name;
         this.schemaName = schemaName;
@@ -135,6 +138,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     Schema.methods({
         addProp: function(name, schemaName, defaultValue, card) {
+            if (schemaName == undefined) {
+                schemaName = 'string';
+            }
             var schema = this.world.schemas[schemaName];
             if (schema instanceof BuiltIn) {
                 var prop = new Property(name, schemaName,
