@@ -139,7 +139,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var t1 = t.createInstance();
             t1.setProp('p1', {'x': 10, 'y': 20});
             ut.assertEq(typeof t1.p1, 'object');
-            ut.assertEq(t1.p1.name, 'coordinate');
+            ut.assertEq(t1.p1._schema.name, 'coordinate');
             ut.assertEq(typeof t1.p1.x, 'number');
             ut.assertEq(t1.p1.x, 10);
             ut.assertEq(typeof t1.p1.y, 'number');
@@ -175,7 +175,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(obj.d1.getTime(), (new Date("1/1/2010")).getTime());
 
             ut.assertEq(typeof obj.c1, 'object');
-            ut.assertEq(obj.c1.type, 'coordinate');
+            ut.assertEq(obj.c1._schema.name, 'coordinate');
             ut.assertEq(obj.c1.x, 10);
             ut.assertEq(obj.c1.y, 20);
         });
