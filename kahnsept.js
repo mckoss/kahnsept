@@ -86,8 +86,6 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("Property " + name + " exists.");
             }
 
-            
-            
             this.props[name] = new Property(name, type, defaultValue);
         },
 
@@ -100,11 +98,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             this.world.instances.push(i);
 
             for(var prop in this.props) {
-            	if(this.props[prop].defaultValue != undefined) {
-            		i.setProp(prop, this.props[prop].defaultValue);
-            	}
+                if(this.props[prop].defaultValue != undefined) {
+                    i.setProp(prop, this.props[prop].defaultValue);
+                }
             }
-            
+
             if (values != undefined) {
                 for (var prop in values) {
                     if (values.hasOwnProperty(prop)) {
