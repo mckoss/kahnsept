@@ -61,7 +61,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     // Relationship is created from two schemas, cardinalities
     // and "tags" (property names).
-    function Relationship(schemaNames, names, cards) {
+    function Relationship(names, schemaNames, defaultValues, cards) {
         var i;
 
         this.schemaNames = schemaNames;
@@ -85,7 +85,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 }
                 props[i] = new Property(this.names[i],
                                         this.schemaNames[1 - i],
-                                        undefined,
+                                        defaultValues[i],
                                         this.cards[i]);
 
                 schemas[i]._addProp(this.names[i], props[i]);
@@ -142,8 +142,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 this._addProp(name, prop);
             }
             else {
-                new Relationship([this.name, schemaName],
-                                 [name, undefined],
+                new Relationship([name, undefined],
+                                 [this.name, schemaName],
+                                 [defaultValue, undefined],
                                  [card, this.world.inverseCard(card)]);
             }
             return this.props[name];
@@ -166,12 +167,16 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var prop;
             this.world.instances.push(i);
 
+            // Set default property values - as defined in Schema
             for (prop in this.props) {
-                if (this.props[prop].defaultValue != undefined) {
-                    i.setProp(prop, this.props[prop].defaultValue);
+                if (this.props.hasOwnProperty(prop)) {
+                    if (this.props[prop].defaultValue != undefined) {
+                        i.setProp(prop, this.props[prop].defaultValue);
+                    }
                 }
             }
 
+            // Insitialize other properties as passed in createInstance
             if (values != undefined) {
                 for (prop in values) {
                     if (values.hasOwnProperty(prop)) {
