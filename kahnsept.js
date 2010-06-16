@@ -142,6 +142,25 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             this.schemas[schema.name] = schema;
             schema.world = this;
+        },
+
+        toJSON: function() {
+            var json = {
+                schemas: {},
+                instances: []
+            };
+
+            for (var schemaName in this.schemas) {
+                if (this.schemas.hasOwnProperty(schemaName)) {
+                    var schema = this.schemas[schemaName];
+                    // Don't bother to serialize the built-in Schema
+                    if (schema instanceof BuiltIn) {
+                        continue;
+                    }
+                    json.schemas[schema.name] = schema.toJSON();
+                }
+            }
+            return json;
         }
     });
 
@@ -238,6 +257,14 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 }
             }
             return i;
+        },
+
+        toJSON: function() {
+            var json = {
+                'name': this.name
+            };
+
+            return json;
         }
     });
 
