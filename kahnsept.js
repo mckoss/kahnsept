@@ -11,8 +11,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         this.init();
     }
 
-     // Schema - A definition for a Kahnsept "object". Contains a
-     // collection of allowed properties.
+    // Schema - A definition for a Kahnsept "object". Contains a
+    // collection of allowed properties.
     function Schema(name, world) {
         if (typeof name != 'string') {
             throw new Error("Invalid schema name: " + name);
