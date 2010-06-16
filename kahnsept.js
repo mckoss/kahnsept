@@ -1,5 +1,8 @@
 namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     var util = namespace.util;
+
+    // BUG: Kind of a hack - try to minimize the need for a global
+    // world variable.
     var currentWorld;
 
     // World - Container for all data and meta-data for schemas, and
@@ -187,6 +190,18 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 json.instances.push(instance.toJSON());
             }
             return json;
+        },
+
+        // Import from the JSON export format into the current world.
+        // Try to preserve Instance id's - but not guaranteed.
+        importJSON: function(json, schemaOnly) {
+            var i;
+
+            var schemas = json.schemas;
+            for (i = 0; i < schemas.length; i++) {
+                var schema = schemas[i];
+                Schema.fromJSON(schema);
+            }
         }
     });
 
@@ -304,6 +319,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         }
     });
 
+    namespace.extend(Schema, {
+        fromJSON: function (json) {
+            var schema = new Schema(json.name);
+        }
+    });
+
     BuiltIn.methods({
         // For BuiltIn's, we just convert the initial value to the
         // corresponding JavaScript value type.
@@ -332,12 +353,22 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         // fOneOnly prevents calling setValue on the bi-directional
         // property of a relationship (to prevent infinite recursion).
         setValue: function(instance, value, fOneOnly) {
+            var i;
+
+            // Allow setting multiple values at once.
+            if (value instanceof Array && this.card == 'many') {
+                for (i = 0; i < value.length; i++) {
+                    this.setValue(instance, value[i], fOneOnly);
+                }
+                return;
+            }
+
             var schema = currentWorld.schemas[this.schemaName];
             if (schema == undefined) {
                 throw new Error("Undefined schema: " + this.schemaName);
             }
 
-            var i = this.indexValue(instance, value);
+            i = this.indexValue(instance, value);
 
             // Setting an existing value is a no-op.
             if (i != undefined) {
@@ -406,7 +437,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         toJSON: function() {
             var json = {
                 'defaultValue': this.defaultValue,
-                'schema': this.schemaName
+                'schema': this.schemaName,
+                'card': this.card
             };
             if (this.relationship) {
                 json.name = this.name;
