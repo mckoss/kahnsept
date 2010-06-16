@@ -7,8 +7,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     function World() {
         currentWorld = this;
         this.schemas = {};
+        this.relationships = [];
         this.instances = [];
+
+        // Next unique id for instances.
         this.idNext = 0;
+
         this.init();
     }
 
@@ -71,6 +75,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     // conform to a Schema definition.
     function Instance(schema) {
         this._schema = schema;
+        this._id = currentWorld.idNext++;
     }
 
     // Relationship - Relationships are "bi-directional" properties.
@@ -112,6 +117,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
                 this.schemas[i]._addProp(this.names[i], this.props[i]);
             }
+            currentWorld.relationships.push(this);
         } catch (e) {
             // If we have an error, we should clean up any half-generated
             // properties.
@@ -152,9 +158,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         },
 
         toJSON: function() {
+            var i;
             var json = {
                 schemas: {},
-                instances: []
+                relationships: [],
+                instances: [],
+                idNext: this.idNext
             };
 
             for (var schemaName in this.schemas) {
@@ -166,6 +175,16 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                     }
                     json.schemas[schema.name] = schema.toJSON();
                 }
+            }
+
+            for (i = 0; i < this.relationships.length; i++) {
+                var relationship = this.relationships[i];
+                json.relationships.push(relationship.toJSON());
+            }
+
+            for (i = 0; i < this.instances.length; i++) {
+                var instance = this.instances[i];
+                json.instances.push(instance.toJSON());
             }
             return json;
         }
@@ -393,6 +412,33 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 json.name = this.name;
             }
             return json;
+        },
+
+        getJSON: function(instance) {
+            if (this.card == 'one') {
+                return this.valueJSON(instance[this.name]);
+            }
+
+            var json = [];
+            var values = instance[this.name];
+            for (var i = 0; i < values.length; i++) {
+                json.push(this.valueJSON(values[i]));
+            }
+            return json;
+        },
+
+        valueJSON: function(value) {
+            if (value == undefined) {
+                return undefined;
+            }
+
+            if (!this.relationship) {
+                return value;
+            }
+
+            // Relation properties are unambiguously Instance
+            // references - so we can just persist the instance id.
+            return value._id;
         }
     });
 
@@ -408,9 +454,23 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         },
 
         deleteProps: function() {
-            for (var i = 0; i < 2; i++) {
+            var i;
+            for (i = 0; i < 2; i++) {
                 this.schemas[i].delProp(this.names[i], true);
             }
+
+            var relationships = currentWorld.relationships;
+            for (i = 0; i < relationships.length; i++) {
+                if (relationships[i] == this) {
+                    relationships.splice(i, 1);
+                    return;
+                }
+            }
+        },
+
+        toJSON: function() {
+            return [this.props[0].toJSON(),
+                    this.props[1].toJSON()];
         }
     });
 
@@ -424,6 +484,23 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             prop.setValue(this, value);
+        },
+
+        toJSON: function() {
+            var schema = this._schema;
+
+            var json = {
+                '_schema': schema.name,
+                '_id': this._id
+            };
+
+            for (var propName in schema.props) {
+                if (schema.props.hasOwnProperty(propName)) {
+                    var prop = schema.props[propName];
+                    json[propName] = prop.getJSON(this);
+                }
+            }
+            return json;
         }
     });
 
