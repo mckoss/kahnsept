@@ -39,14 +39,14 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             // type
             var fThrows = false;
             try {
-                s.addProp('prop1', 'bogus');
+                s.addProp('prop1', 'Bogus');
             } catch (e) {
                 fThrows = true;
                 ut.assertException(e, "Invalid schema");
             }
             ut.assert(fThrows);
 
-            s.addProp('prop1', 'string');
+            s.addProp('prop1', 'String');
             // Property successfuly added
             ut.assertEq(base.keys(s.props).length, 1);
             // Prop is a Property
@@ -62,10 +62,10 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
         ts.addTest("Instances", function(ut) {
             var w = new kahnsept.World();
             var s = new kahnsept.Schema('test');
-            s.addProp("s1", "string");
-            s.addProp("n1", "number");
-            s.addProp("b1", "boolean");
-            s.addProp("d1", "date");
+            s.addProp("s1", "String");
+            s.addProp("n1", "Number");
+            s.addProp("b1", "Boolean");
+            s.addProp("d1", "Date");
 
             var obj = s.createInstance();
             ut.assertEq(typeof obj, 'object');
@@ -102,10 +102,10 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
         ts.addTest("Property type conversion", function(ut) {
             var w = new kahnsept.World();
             var s = new kahnsept.Schema('test');
-            s.addProp("s1", "string");
-            s.addProp("n1", "number");
-            s.addProp("b1", "boolean");
-            s.addProp("d1", "date");
+            s.addProp("s1", "String");
+            s.addProp("n1", "Number");
+            s.addProp("b1", "Boolean");
+            s.addProp("d1", "Date");
 
             var obj = s.createInstance();
 
@@ -130,7 +130,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
         ts.addTest("Multi-valued properties", function(ut) {
             var w = new kahnsept.World();
             var s = new kahnsept.Schema('test');
-            s.addProp("s1", "string", undefined, 'many');
+            s.addProp("s1", "String", undefined, 'many');
 
             var obj = s.createInstance();
 
@@ -144,8 +144,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
         ts.addTest("Complex Schema", function(ut) {
             var w = new kahnsept.World();
             var coord = new kahnsept.Schema('coordinate');
-            coord.addProp("x", "number");
-            coord.addProp("y", "number");
+            coord.addProp("x", "Number");
+            coord.addProp("y", "Number");
             console.log(coord);
 
             var t = new kahnsept.Schema('test');
@@ -163,16 +163,16 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("Default properties", function(ut) {
             var w = new kahnsept.World();
-            var coord = new kahnsept.Schema('coordinate');
-            coord.addProp("x", "number");
-            coord.addProp("y", "number");
+            var coord = new kahnsept.Schema('Coordinate');
+            coord.addProp("x", "Number");
+            coord.addProp("y", "Number");
 
             var s = new kahnsept.Schema('test');
-            s.addProp("s1", "string", "default");
-            s.addProp("n1", "number", 123);
-            s.addProp("b1", "boolean", false);
-            s.addProp("d1", "date", new Date("1/1/2010"));
-            s.addProp("c1", "coordinate", {'x': 10, 'y': 20});
+            s.addProp("s1", "String", "default");
+            s.addProp("n1", "Number", 123);
+            s.addProp("b1", "Boolean", false);
+            s.addProp("d1", "Date", new Date("1/1/2010"));
+            s.addProp("c1", "Coordinate", {'x': 10, 'y': 20});
 
             var obj = s.createInstance();
 
@@ -190,7 +190,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(obj.d1.getTime(), (new Date("1/1/2010")).getTime());
 
             ut.assertEq(typeof obj.c1, 'object');
-            ut.assertEq(obj.c1._schema.name, 'coordinate');
+            ut.assertEq(obj.c1._schema.name, 'Coordinate');
             ut.assertEq(obj.c1.x, 10);
             ut.assertEq(obj.c1.y, 20);
         });
@@ -199,7 +199,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var w = new kahnsept.World();
             var person = new kahnsept.Schema('Person');
             person.addProp('name');
-            person.addProp('age', 'number');
+            person.addProp('age', 'Number');
 
             var deb = person.createInstance();
             deb.setProp('name', "Debbie");
@@ -227,6 +227,10 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertIdent(fred.wife, deb);
             ut.assertIdent(deb.husband, fred);
             ut.assertIdent(mike.wife, undefined);
+
+            var s = JSON.stringify(w.toJSON(), undefined, 4);
+            ut.assertEq(typeof s, 'string');
+            console.log(s);
         });
 
         ts.addTest("delProp", function(ut) {
@@ -306,18 +310,6 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(c2.model.length, 2);
         });
 
-        ts.addTest("toJSON", function(ut) {
-            var w = new kahnsept.World();
-            var s = JSON.stringify(w.toJSON(), undefined, 4);
-            var parent = new kahnsept.Schema('Parent');
-            var child = new kahnsept.Schema('Child');
-
-            new kahnsept.Relationship('Child', 'Parent',
-                                      {'cards': ['one', 'many']});
-
-            ut.assertEq(typeof s, 'string');
-            console.log(s);
-        });
     }
 
     ns.addTests = addTests;

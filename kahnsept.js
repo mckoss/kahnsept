@@ -61,10 +61,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     BuiltIn.prototype = new Schema('dummy');
     BuiltIn.types = {
-        'number': Number,
-        'string': String,
-        'boolean': Boolean,
-        'date': Date
+        'Number': Number,
+        'String': String,
+        'Boolean': Boolean,
+        'Date': Date
     };
 
     // Instance - An instance is a collection of property name/value pairs which
@@ -176,7 +176,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         // and shorthand for bi-directional Relationships.
         addProp: function(name, schemaName, defaultValue, card) {
             if (schemaName == undefined) {
-                schemaName = 'string';
+                schemaName = 'String';
             }
             var schema = this.world.schemas[schemaName];
             if (schema instanceof BuiltIn) {
@@ -269,9 +269,18 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
         toJSON: function() {
             var json = {
-                'name': this.name
+                'name': this.name,
+                'props': {}
             };
 
+            for (var propName in this.props) {
+                if (this.props.hasOwnProperty(propName)) {
+                    var prop = this.props[propName];
+                    if (!prop.relationship) {
+                        json.props[propName] = prop.toJSON();
+                    }
+                }
+            }
             return json;
         }
     });
@@ -281,16 +290,16 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         // corresponding JavaScript value type.
         createInstance: function(value) {
             switch (this.name) {
-            case 'string':
+            case 'String':
                 value = value.toString();
                 break;
-            case 'number':
+            case 'Number':
                 value = parseFloat(value);
                 break;
-            case 'boolean':
+            case 'Boolean':
                 value = Boolean(value);
                 break;
-            case 'date':
+            case 'Date':
                 value = new Date(value);
                 break;
             }
@@ -373,7 +382,17 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 var otherProp = this.relationship.otherProp(this);
                 otherProp.removeValue(value, instance, true);
             }
+        },
 
+        toJSON: function() {
+            var json = {
+                'defaultValue': this.defaultValue,
+                'schema': this.schemaName
+            };
+            if (this.relationship) {
+                json.name = this.name;
+            }
+            return json;
         }
     });
 
