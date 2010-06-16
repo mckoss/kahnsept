@@ -230,6 +230,88 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertIdent(deb.husband, fred);
             ut.assertIdent(mike.wife, undefined);
         });
+        
+        ts.addTest("Delete single relationship property", function(ut) {
+            var w = new kahnsept.World();
+            var person = new kahnsept.Schema('person');
+            var address = new kahnsept.Schema('address');
+            
+            person.addProp('residence', 'address', undefined, 'one');
+            
+            ut.assert(person.props['residence'] != undefined);
+            ut.assert(address.props['person'] != undefined);
+            
+            person.delProp('residence');
+            
+            ut.assertEq(person.props['residence'], undefined);
+            ut.assertEq(address.props['person'], undefined);
+        });
+        
+        ts.addTest("One to Many relationship ", function(ut) {
+        	var w = new kahnsept.World();
+        	var parent = new kahnsept.Schema('Parent');
+        	var child = new kahnsept.Schema('Child');
+        	
+        	new kahnsept.Relationship([undefined, undefined],
+                    ['Child', 'Parent'],
+                    undefined,
+                    ['one', 'many']);
+        	
+        	var p1 = parent.createInstance();
+        	var p2 = parent.createInstance();
+        	var c1 = child.createInstance();
+        	var c2 = child.createInstance();
+        	
+        	//Single Connection
+        	p1.setProp('child', c1);
+        	ut.assertIdent(p1.child[0], c1);
+        	ut.assertIdent(c1.parent, p1);
+        	
+        	//One parent, two children
+        	p1.setProp('child', c2);
+        	ut.assertEq(p1.child.length, 2);
+        	ut.assertIdent(p1.child[1], c2);
+        	//ut.assert(p1.hasValue("child", c1));
+        	//ut.assert(p1.hasValue("child", c2));
+        	ut.assertIdent(c2.parent, p1);
+        	
+        	//"Steal" child into second parent
+        	p2.setProp('child', c2);
+        	ut.assertEq(p1.child.length, 1);
+        	ut.assertEq(p2.child.length, 1);
+        	ut.assertIdent(p1.child[0], c1);
+        	ut.assertIdent(p2.child[0], c2);
+        });
+
+        
+        ts.addTest("Many to Many relationship ", function(ut) {
+        	var w = new kahnsept.World();
+        	var model = new kahnsept.Schema('Model');
+        	var color = new kahnsept.Schema('Color');
+        	
+        	new kahnsept.Relationship([undefined, undefined],
+                    ['Color', 'Model'],
+                    undefined,
+                    ['many', 'many']);
+        	
+        	var m1 = model.createInstance();
+        	var m2 = model.createInstance();
+        	var c1 = color.createInstance();
+        	var c2 = color.createInstance();
+        	
+        	m1.setProp('color', c1);
+        	m1.setProp('color', c2);
+        	ut.assertEq(m1.color.length, 2);
+        	ut.assertEq(c1.model.length, 1);
+        	ut.assertEq(c2.model.length, 1);
+        	
+        	m2.setProp('color', c1);
+        	m2.setProp('color', c2);
+        	ut.assertEq(m1.color.length, 2);
+        	ut.assertEq(m2.color.length, 2);
+        	ut.assertEq(c1.model.length, 2);
+        	ut.assertEq(c2.model.length, 2);
+        });
     }
 
     ns.addTests = addTests;

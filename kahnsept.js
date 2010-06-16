@@ -85,7 +85,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
         for (i = 0; i < 2; i++) {
             if (this.names[i] == undefined) {
-                this.names[i] = this.schemaNames[1 - i];
+                this.names[i] = this.schemaNames[1 - i].toLowerCase();
             }
         }
 
