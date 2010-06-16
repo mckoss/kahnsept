@@ -197,7 +197,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("Kahnsept Video Demo", function(ut) {
             var w = new kahnsept.World();
-            var person = new kahnsept.Schema('person');
+            var person = new kahnsept.Schema('Person');
             person.addProp('name');
             person.addProp('age', 'number');
 
@@ -212,10 +212,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(mike.name, "Mike");
             ut.assert(mike.age > deb.age);
 
-            new kahnsept.Relationship(['husband', 'wife'],
-                                      ['person', 'person'],
-                                      undefined,
-                                      ['one', 'one']);
+            new kahnsept.Relationship('Person', 'Person',
+                                      {'names': ['husband', 'wife']});
 
             mike.setProp('wife', deb);
             ut.assertIdent(mike.wife, deb);
@@ -252,10 +250,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var parent = new kahnsept.Schema('Parent');
             var child = new kahnsept.Schema('Child');
 
-            new kahnsept.Relationship([undefined, undefined],
-                                      ['Child', 'Parent'],
-                                      undefined,
-                                      ['one', 'many']);
+            new kahnsept.Relationship('Child', 'Parent',
+                                      {'cards': ['one', 'many']});
 
             var p1 = parent.createInstance();
             var p2 = parent.createInstance();
@@ -288,10 +284,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var model = new kahnsept.Schema('Model');
             var color = new kahnsept.Schema('Color');
 
-            new kahnsept.Relationship([undefined, undefined],
-                                      ['Color', 'Model'],
-                                      undefined,
-                                      ['many', 'many']);
+            new kahnsept.Relationship('Color', 'Model',
+                                      {'cards': ['many', 'many']});
 
             var m1 = model.createInstance();
             var m2 = model.createInstance();
@@ -315,6 +309,12 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
         ts.addTest("toJSON", function(ut) {
             var w = new kahnsept.World();
             var s = JSON.stringify(w.toJSON(), undefined, 4);
+            var parent = new kahnsept.Schema('Parent');
+            var child = new kahnsept.Schema('Child');
+
+            new kahnsept.Relationship('Child', 'Parent',
+                                      {'cards': ['one', 'many']});
+
             ut.assertEq(typeof s, 'string');
             console.log(s);
         });
