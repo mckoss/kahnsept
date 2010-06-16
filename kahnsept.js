@@ -1,17 +1,18 @@
 namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     var currentWorld;
 
+    // World - Container for all data and meta-data for schemas, and
+    // instances.
     function World() {
         currentWorld = this;
-
         this.schemas = {};
-
         this.instances = [];
         this.idNext = 0;
-
         this.init();
     }
 
+     // Schema - A definition for a Kahnsept "object". Contains a
+     // collection of allowed properties.
     function Schema(name, world) {
         if (typeof name != 'string') {
             throw new Error("Invalid schema name: " + name);
@@ -26,7 +27,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         this.props = {};
     }
 
-    // A schema property definition:
+    // Property - Defintion for a single property in an Schema.  Can
+    // be single or multi-valued (card == 'one' or card == 'many'.
+    // Each property has a name and schemaName of the type of value(s)
+    // that it can contain.
+    //
     // defaultValue can be one of:
     //   undefined
     //   Instance - shared by all instances that have this property
@@ -47,6 +52,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         }
     }
 
+    // BuiltIn - A Schema sub-class to represent the built-in property
+    // types in Kahnsept.
     function BuiltIn(name, world) {
         Schema.call(this, name, world);
     }
@@ -59,12 +66,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         'date': Date
     };
 
+    // Instance - An instance is a collection of property name/value pairs which
+    // conform to a Schema definition.
     function Instance(schema) {
         this._schema = schema;
     }
 
-    // Relationship is created from two schemas, cardinalities
-    // and (property names).
+    // Relationship - Relationships are "bi-directional" properties.
     function Relationship(names, schemaNames, defaultValues, cards) {
         var i;
 
@@ -75,7 +83,6 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             defaultValues = [undefined, undefined];
         }
 
-        // The name for each property
         for (i = 0; i < 2; i++) {
             if (this.names[i] == undefined) {
                 this.names[i] = this.schemaNames[1 - i];
@@ -99,6 +106,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 schemas[i]._addProp(this.names[i], this.props[i]);
             }
         } catch (e) {
+            // If we have an error, we should clean up any half-generated
+            // properties.
             for (i = 0; i < 2; i++) {
                 if (this.props[i]) {
                     schemas[i].delProp(this.names[i]);
@@ -110,6 +119,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     }
 
     World.methods({
+        // Initialize the World by creating all the built-in Schema types.
         init: function() {
             for (var type in BuiltIn.types) {
                 if (BuiltIn.types.hasOwnProperty(type)) {
@@ -118,6 +128,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
         },
 
+        // Add a new schema to the World.
         addSchema: function(schema) {
             if (!(schema instanceof Schema)) {
                 throw new Error("Invalid schema: " + schema);
@@ -134,6 +145,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     });
 
     Schema.methods({
+        // Add a property to the Schema.  Handles BuiltIt properties
+        // and shorthand for bi-directional Relationships.
         addProp: function(name, schemaName, defaultValue, card) {
             if (schemaName == undefined) {
                 schemaName = 'string';
@@ -153,6 +166,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return this.props[name];
         },
 
+        // Internal function to register a property in the Schema.
         _addProp: function (name, prop) {
             if (this.props[name]) {
                 throw new Error("Property " + name + " exists.");
@@ -161,10 +175,18 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             this.props[name] = prop;
         },
 
+        // Remove a property from this schema.
+        // BUG: Does not delete the inverse property of a relationship.
         delProp: function(name) {
             delete this.props[name];
         },
 
+        // Make an instance of the given Schema. Instances can be a
+        // reference to and existing Instance, or a property value
+        // descriptor (an Object containing property names and values to
+        // assign).
+        //
+        // Note that BuiltIn overrides the createInstance method (below).
         createInstance: function (values) {
             if (values instanceof Instance) {
                 if (values._schema.name != this.name) {
@@ -209,6 +231,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     });
 
     BuiltIn.methods({
+        // For BuiltIn's, we just convert the initial value to the
+        // corresponding JavaScript value type.
         createInstance: function(value) {
             switch (this.name) {
             case 'string':
@@ -230,30 +254,38 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     });
 
     Property.methods({
+        // Assign a value to a property in an instance.
+        // fOneOnly prevents calling setValue on the bi-directional
+        // property of a relationship (to prevent infinite recursion).
         setValue: function(instance, value, fOneOnly) {
-            var i = this.indexValue(instance, value);
             var schema = currentWorld.schemas[this.schemaName];
-
             if (schema == undefined) {
                 throw new Error("Undefined schema: " + this.schemaName);
             }
 
+            var i = this.indexValue(instance, value);
+
+            // Setting an existing value is a no-op.
+            if (i != undefined) {
+                return;
+            }
+
+            // Convert the initial value to the correct type.
             value = schema.createInstance(value);
 
+            // Multi-valued property.
             if (this.card == 'many') {
-                if (i != undefined) {
-                    return;
-                }
                 instance[this.name].push(value);
             }
+            // Single-valued property.
             else {
                 this.removeValue(instance, instance[this.name]);
                 instance[this.name] = value;
             }
 
-            if (!fOneOnly && this.relationship) {
-                var propOther = this.relationship.otherProp(this);
-                propOther.setValue(value, instance, i);
+            if (this.relationship && !fOneOnly) {
+                var otherProp = this.relationship.otherProp(this);
+                otherProp.setValue(value, instance, true);
             }
         },
 
@@ -287,12 +319,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             } else if (i === true) {
                 instance[this.name] = undefined;
             } else {
-                delete instance[this.name];
+                var values = instance[this.name];
+                values.splice(i, 1);
             }
 
-            if (!fOneOnly && this.relationship) {
-                var propOther = this.relationship.otherProp(this);
-                propOther.removeValue(value, instance, true);
+            if (this.relationship && !fOneOnly) {
+                var otherProp = this.relationship.otherProp(this);
+                otherProp.removeValue(value, instance, true);
             }
 
         }
