@@ -131,8 +131,11 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var w = new kahnsept.World();
             var s = new kahnsept.Schema('test');
             s.addProp("s1", "String", undefined, 'many');
+            s.addProp("s2", "String", undefined, 'many');
 
-            var obj = s.createInstance();
+            var obj = s.createInstance({'s2': ['hello', 'mom']});
+
+            ut.assertEq(obj.s2, ['hello', 'mom']);
 
             obj.setProp("s1", 'test');
             ut.assertEq(obj.s1, ['test']);
@@ -229,7 +232,6 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
             var s = JSON.stringify(w.toJSON(), undefined, 4);
             ut.assertEq(typeof s, 'string');
-            console.log(s);
         });
 
         ts.addTest("delProp", function(ut) {
@@ -282,7 +284,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertIdent(p2.child[0], c2);
         });
 
-        ts.addTest("Many to Many relationship ", function(ut) {
+        ts.addTest("Many to Many", function(ut) {
             var w = new kahnsept.World();
             var model = new kahnsept.Schema('Model');
             var color = new kahnsept.Schema('Color');
@@ -309,6 +311,35 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(c2.model.length, 2);
         });
 
+        ts.addTest("JSON", function(ut) {
+            var w = new kahnsept.World();
+            var person = new kahnsept.Schema('Person');
+            person.addProp('name');
+            person.addProp('age', 'Number');
+
+            new kahnsept.Relationship('Person', 'Person',
+                                      {'names': ['husband', 'wife']});
+
+            new kahnsept.Relationship('Person', 'Person',
+                                      {'names': ['parents', 'children'],
+                                       'cards': ['many', 'many']});
+
+            var deb = person.createInstance({name: "Debbie",
+                                             age: 29});
+            var mike = person.createInstance({name: "Mike",
+                                              age: 49,
+                                              wife: deb});
+            var chris = person.createInstance({name: "Chris",
+                                               age: 21,
+                                               parents: [mike, deb]});
+            var fred = person.createInstance({name: "Fred",
+                                              age: 21,
+                                              wife: deb});
+
+            var s = JSON.stringify(w.toJSON(), undefined, 4);
+            ut.assertEq(typeof s, 'string');
+            console.log(s);
+        });
     }
 
     ns.addTests = addTests;
