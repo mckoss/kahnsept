@@ -197,58 +197,68 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         }
     });
 
+    BuiltIn.methods({
+        createInstance: function(value) {
+           switch (this.name) {
+           case 'string':
+               value = value.toString();
+               break;
+           case 'number':
+               value = parseFloat(value);
+               break;
+           case 'boolean':
+               value = Boolean(value);
+               break;
+           case 'date':
+               value = new Date(value);
+               break;
+           }
+
+           return value;
+        }
+    });
+
+    Property.methods({
+        setValue: function(instance, value) {
+            if (this.card == 'many') {
+                // TODO: Don't add duplicate values?
+                // How do we edit or delete a value in a 'many' property?
+                if (instance[this.name] == undefined) {
+                    instance[this.name] = [];
+                }
+                instance[this.name].push(value);
+            }
+            else {
+                instance[this.name] = value;
+            }
+
+        }
+    });
+
     Instance.methods({
         setProp: function (name, value) {
             var prop = this._schema.props[name];
+
             if (prop == undefined) {
                 throw new Error("Property " + name + " does not exist.");
             }
+
             var targetSchemaName = prop.schemaName;
-            // TODO: Call schema.setValue(this, name, value) so each
-            // schema class implements it's own setter function.
-            switch (targetSchemaName) {
-            case 'string':
-                value = value.toString();
-                break;
-            case 'number':
-                value = parseFloat(value);
-                break;
-            case 'boolean':
-                value = Boolean(value);
-                break;
-            case 'date':
-                value = new Date(value);
-                break;
-            default:
-                if (value instanceof Instance) {
-                    if (value._schema.name != targetSchemaName) {
-                        throw new Error("Property type mismatch, " +
-                                        value._schema.name +
-                                        " should be " + targetSchemaName + ".");
-                    }
-                }
-                else {
-                    var world = this._schema.world;
-                    var schema = world.schemas[targetSchemaName];
-                    if (schema == undefined) {
-                        throw new Error("Undefined schema: " +
-                                        targetSchemaName);
-                    }
-                    value = schema.createInstance(value);
-                }
+
+            if (value instanceof Instance && value._schema.name != targetSchemaName) {
+                throw new Error("Property type mismatch, " +
+                                value._schema.name + " should be " + targetSchemaName + ".");
             }
 
-            if (prop.card == 'many') {
-                // TODO: Don't add duplicate values?
-                // How do we edit or delete a value in a 'many' property?
-                if (this[name] == undefined) {
-                    this[name] = [];
-                }
-                this[name].push(value);
+            var world = this._schema.world;
+            var schema = world.schemas[targetSchemaName];
+
+            if (schema == undefined) {
+                throw new Error("Undefined schema: " + targetSchemaName);
             }
-            else {
-                this[name] = value;
-            }
+
+            value = schema.createInstance(value);
+            prop.setValue(this, value);
         }
     });
 
