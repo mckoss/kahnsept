@@ -253,16 +253,23 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 instance[this.name].push(value);
             }
             else {
+		if (i) {
+		    this.removeValue(instance, instance[this.name]);
+		}
                 instance[this.name] = value;
             }
             
             if (!fOneOnly && this.relationship) {
                 var propOther = this.relationship.otherProp(this);
-                propOther.setValue(value, instance, true);
+                propOther.setValue(value, instance, i);
             }
         },
 
         indexValue: function(instance, value) {
+            if (!(instance instanceof Instance)) {
+		throw new Error("Invalid instance: " + (typeof instance));
+	    }
+
             if (this.card == 'one') {
                 return value == instance[this.name];
             }
@@ -274,10 +281,22 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 }
             }
             return undefined;
-        },
+	    },
 
         removeValue: function(instance, value, fOneOnly) {
-            var i = this.hasValue(instance, value);
+            var i = this.indexValue(instance, value);
+	    if (i == undefined) {
+		return;
+	    } else if (i == true) {
+		instance[this.name] = undefined;
+	    } else {
+		delete instance[this.name];
+	    }
+
+	    if (!fOneOnly && this.relationship) {
+		var propOther = this.relationship.otherProp(this);
+		propOther.removeValue(value, instance, true);
+	    }
             
         }
     });
