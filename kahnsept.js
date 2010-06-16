@@ -314,7 +314,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             var values = instance[this.name];
-            for (var i = 0; i < values[i]; i++) {
+            for (var i = 0; i < values.length; i++) {
                 if (value == values[i]) {
                     return i;
                 }
