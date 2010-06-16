@@ -213,7 +213,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assert(mike.age > deb.age);
 
             new kahnsept.Relationship(['husband', 'wife'],
-                                      [person, person],
+                                      ['person', 'person'],
                                       undefined,
                                       ['one', 'one']);
 

@@ -70,6 +70,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         this.schemaNames = schemaNames;
         this.cards = cards;
         this.names = names;
+        if (defaultValues == undefined) {
+            defaultValues = [undefined, undefined];
+        }
 
         // The name for each property
         for (i = 0; i < 2; i++) {
@@ -218,9 +221,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 break;
             default:
                 if (value instanceof Instance) {
-                    if (value.schemaName != targetSchemaName) {
+                    if (value._schema.name != targetSchemaName) {
                         throw new Error("Property type mismatch, " +
-                                        value.schemaName +
+                                        value._schema.name +
                                         " should be " + targetSchemaName + ".");
                     }
                 }
