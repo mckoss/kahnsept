@@ -283,7 +283,6 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertIdent(p2.child[0], c2);
         });
 
-
         ts.addTest("Many to Many relationship ", function(ut) {
             var w = new kahnsept.World();
             var model = new kahnsept.Schema('Model');
@@ -311,6 +310,13 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(m2.color.length, 2);
             ut.assertEq(c1.model.length, 2);
             ut.assertEq(c2.model.length, 2);
+        });
+
+        ts.addTest("toJSON", function(ut) {
+            var w = new kahnsept.World();
+            var s = JSON.stringify(w.toJSON(), undefined, 4);
+            ut.assertEq(typeof s, 'string');
+            console.log(s);
         });
     }
 
