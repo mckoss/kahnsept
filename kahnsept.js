@@ -130,15 +130,6 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             this.schemas[schema.name] = schema;
             schema.world = this;
-        },
-
-        inverseCard: function(card) {
-            if (card == 'one') {
-                return 'many';
-            } else if (card == 'many') {
-                return 'one';
-            }
-            return undefined;
         }
     });
 
@@ -157,7 +148,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 new Relationship([name, undefined],
                                  [this.name, schemaName],
                                  [defaultValue, undefined],
-                                 [card, this.world.inverseCard(card)]);
+                                 [card, undefined]);
             }
             return this.props[name];
         },
@@ -178,20 +169,23 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (values instanceof Instance) {
                 if (values._schema.name != this.name) {
                     throw new Error("Property type mismatch, " +
-                                    values._schema.name + " should be " + targetSchemaName + ".");
+                                    values._schema.name + " should be " +
+                                    this.name + ".");
                 }
                 return values;
             }
 
             var i = new Instance(this);
             var name;
+            var prop;
+
             this.world.instances.push(i);
 
             // Set default property values and initialize multi-valued
             // properties to empty array.
             for (name in this.props) {
                 if (this.props.hasOwnProperty(name)) {
-                    var prop = this.props[name];
+                    prop = this.props[name];
                     if (prop.card == 'many') {
                         i[name] = [];
                     }
@@ -205,7 +199,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (values != undefined) {
                 for (name in values) {
                     if (values.hasOwnProperty(name) && name[0] != '_') {
-                        var prop = this.props[name];
+                        prop = this.props[name];
                         prop.setValue(i, values[name]);
                     }
                 }
@@ -253,9 +247,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 instance[this.name].push(value);
             }
             else {
-                if (i) {
-                    this.removeValue(instance, instance[this.name]);
-                }
+                this.removeValue(instance, instance[this.name]);
                 instance[this.name] = value;
             }
 
@@ -270,8 +262,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("Invalid instance: " + (typeof instance));
             }
 
+            if (value == undefined) {
+                return undefined;
+            }
+
             if (this.card == 'one') {
-                return value == instance[this.name];
+                return value == instance[this.name] ? true : undefined;
             }
 
             var values = instance[this.name];
@@ -280,6 +276,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                     return i;
                 }
             }
+
             return undefined;
         },
 
@@ -287,7 +284,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var i = this.indexValue(instance, value);
             if (i == undefined) {
                 return;
-            } else if (i == true) {
+            } else if (i === true) {
                 instance[this.name] = undefined;
             } else {
                 delete instance[this.name];
