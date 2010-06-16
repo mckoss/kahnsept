@@ -90,11 +90,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         }
 
         this.props = [];
-        var schemas = [];
+        this.schemas = [];
         try {
             for (i = 0; i < 2; i++) {
-                schemas[i] = currentWorld.schemas[this.schemaNames[i]];
-                if (schemas[i] == undefined) {
+                this.schemas[i] = currentWorld.schemas[this.schemaNames[i]];
+                if (this.schemas[i] == undefined) {
                     throw new Error("Invalid schema: " + this.schemaNames[i]);
                 }
                 this.props[i] = new Property(this.names[i],
@@ -103,15 +103,16 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                                              this.cards[i],
                                              this);
 
-                schemas[i]._addProp(this.names[i], this.props[i]);
+                this.schemas[i]._addProp(this.names[i], this.props[i]);
             }
         } catch (e) {
             // If we have an error, we should clean up any half-generated
             // properties.
             for (i = 0; i < 2; i++) {
                 if (this.props[i]) {
-                    schemas[i].delProp(this.names[i]);
+                    this.schemas[i].delProp(this.names[i], true);
                     delete this.props[i];
+                    delete this.schemas[i];
                 }
             }
             throw e;
@@ -175,9 +176,19 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             this.props[name] = prop;
         },
 
-        // Remove a property from this schema.
-        // BUG: Does not delete the inverse property of a relationship.
-        delProp: function(name) {
+        // Remove a property from this schema.  Note that we don't
+        // not fix up any instances that may have been using this
+        // property.
+        delProp: function(name, fOneOnly) {
+            var prop = this.props[name];
+            if (prop == undefined) {
+                throw new Error("Property " + name + " does not exist in " +
+                                this.name);
+            }
+            if (prop.relationship && !fOneOnly) {
+                prop.relationship.deleteProps();
+                return;
+            }
             delete this.props[name];
         },
 
@@ -340,6 +351,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 return this.props[0];
             }
             return undefined;
+        },
+
+        deleteProps: function() {
+            for (var i = 0; i < 2; i++) {
+                this.schemas[i].delProp(this.names[i], true);
+            }
         }
     });
 
