@@ -237,9 +237,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     Property.methods({
         setValue: function(instance, value, fOneOnly) {
+            var i = this.indexValue(instance, value);
             if (this.card == 'many') {
-                // TODO: Don't add duplicate values?
-                // How do we edit or delete a value in a 'many' property?
+                if (i != false) {
+                    return;
+                }
                 instance[this.name].push(value);
             }
             else {
@@ -252,7 +254,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
         },
 
-        hasValue: function(instance, value) {
+        indexValue: function(instance, value) {
             if (this.card == 'one') {
                 return value == instance[this.name];
             }
@@ -260,13 +262,14 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var values = instance[this.name];
             for (var i = 0; i < values[i]; i++) {
                 if (value == values[i]) {
-                    return true;
+                    return i;
                 }
             }
-            return false;
+            return undefined;
         },
 
         removeValue: function(instance, value, fOneOnly) {
+            var i = this.hasValue(instance, value);
             
         }
     });
