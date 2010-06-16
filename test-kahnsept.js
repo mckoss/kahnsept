@@ -231,7 +231,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertIdent(mike.wife, undefined);
         });
 
-        ts.addTest("Delete single relationship property", function(ut) {
+        ts.addTest("delProp", function(ut) {
             var w = new kahnsept.World();
             var person = new kahnsept.Schema('person');
             var address = new kahnsept.Schema('address');
@@ -247,7 +247,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(address.props['person'], undefined);
         });
 
-        ts.addTest("One to Many relationship ", function(ut) {
+        ts.addTest("One to Many", function(ut) {
             var w = new kahnsept.World();
             var parent = new kahnsept.Schema('Parent');
             var child = new kahnsept.Schema('Child');
