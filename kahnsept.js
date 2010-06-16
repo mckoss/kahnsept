@@ -1,4 +1,5 @@
 namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
+    var util = namespace.util;
     var currentWorld;
 
     // World - Container for all data and meta-data for schemas, and
@@ -73,15 +74,21 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     }
 
     // Relationship - Relationships are "bi-directional" properties.
-    function Relationship(names, schemaNames, defaultValues, cards) {
+    // Usage:
+    //     new Relationship('Parent', 'Child')
+    //     new Relationship('Parent', 'Child', {names: ['child', 'parent']})
+    //     new Relationship('Parent', 'Child', {cards: ['many', 'one']})
+    // Options:
+    //     names: Property names array
+    //     cards: Cardinality array
+    //     defaultValues: Default property values
+    function Relationship(schemaLeft, schemaRight, options) {
         var i;
 
-        this.schemaNames = schemaNames;
-        this.cards = cards;
-        this.names = names;
-        if (defaultValues == undefined) {
-            defaultValues = [undefined, undefined];
-        }
+        this.schemaNames = [schemaLeft, schemaRight];
+        this.cards = util.copyArray(options.cards);
+        this.names = util.copyArray(options.names);
+        var defaultValues = util.copyArray(options.defaultValues);
 
         for (i = 0; i < 2; i++) {
             if (this.names[i] == undefined) {
@@ -178,10 +185,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 this._addProp(name, prop);
             }
             else {
-                new Relationship([name, undefined],
-                                 [this.name, schemaName],
-                                 [defaultValue, undefined],
-                                 [card, undefined]);
+                new Relationship(this.name, schemaName,
+                                 {'names': [name],
+                                  'defaultValues': [defaultValue],
+                                  'cards': [card]}
+                                );
             }
             return this.props[name];
         },
