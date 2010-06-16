@@ -184,23 +184,29 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             var i = new Instance(this);
-            var prop;
+            var name;
             this.world.instances.push(i);
 
-            // Set default property values - as defined in Schema
-            for (prop in this.props) {
-                if (this.props.hasOwnProperty(prop)) {
-                    if (this.props[prop].defaultValue != undefined) {
-                        i.setProp(prop, this.props[prop].defaultValue);
+            // Set default property values and initialize multi-valued
+            // properties to empty array.
+            for (name in this.props) {
+                if (this.props.hasOwnProperty(name)) {
+                    var prop = this.props[name];
+                    if (prop.card == 'many') {
+                        i[name] = [];
+                    }
+                    if (prop.defaultValue != undefined) {
+                        prop.setValue(i, prop.defaultValue);
                     }
                 }
             }
 
-            // Insitialize other properties as passed in createInstance
+            // Initialize other properties as passed in createInstance
             if (values != undefined) {
-                for (prop in values) {
-                    if (values.hasOwnProperty(prop)) {
-                        i.setProp(prop, values[prop]);
+                for (name in values) {
+                    if (values.hasOwnProperty(name) && name[0] != '_') {
+                        var prop = this.props[name];
+                        prop.setValue(i, values[name]);
                     }
                 }
             }
@@ -234,9 +240,6 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (this.card == 'many') {
                 // TODO: Don't add duplicate values?
                 // How do we edit or delete a value in a 'many' property?
-                if (instance[this.name] == undefined) {
-                    instance[this.name] = [];
-                }
                 instance[this.name].push(value);
             }
             else {
@@ -247,6 +250,24 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 var propOther = this.relationship.otherProp(this);
                 propOther.setValue(value, instance, true);
             }
+        },
+
+        hasValue: function(instance, value) {
+            if (this.card == 'one') {
+                return value == instance[this.name];
+            }
+
+            var values = instance[this.name];
+            for (var i = 0; i < values[i]; i++) {
+                if (value == values[i]) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        removeValue: function(instance, value, fOneOnly) {
+            
         }
     });
 
