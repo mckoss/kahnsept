@@ -64,7 +64,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     }
 
     // Relationship is created from two schemas, cardinalities
-    // and "tags" (property names).
+    // and (property names).
     function Relationship(names, schemaNames, defaultValues, cards) {
         var i;
 
@@ -238,8 +238,16 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     Property.methods({
         setValue: function(instance, value, fOneOnly) {
             var i = this.indexValue(instance, value);
+	    var schema = currentWorld.schemas[this.schemaName];
+
+            if (schema == undefined) {
+                throw new Error("Undefined schema: " + this.schemaName);
+            }
+
+            value = schema.createInstance(value);
+
             if (this.card == 'many') {
-                if (i != false) {
+                if (i != undefined) {
                     return;
                 }
                 instance[this.name].push(value);
@@ -295,16 +303,6 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                                 this._schema.name + " instance.");
             }
 
-            var targetSchemaName = prop.schemaName;
-
-            var world = this._schema.world;
-            var schema = world.schemas[targetSchemaName];
-
-            if (schema == undefined) {
-                throw new Error("Undefined schema: " + targetSchemaName);
-            }
-
-            value = schema.createInstance(value);
             prop.setValue(this, value);
         }
     });
