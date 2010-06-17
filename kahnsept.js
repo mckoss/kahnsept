@@ -163,7 +163,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         toJSON: function() {
             var i;
             var json = {
-                schemas: {},
+                schemas: [],
                 relationships: [],
                 instances: [],
                 idNext: this.idNext
@@ -176,7 +176,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                     if (schema instanceof BuiltIn) {
                         continue;
                     }
-                    json.schemas[schema.name] = schema.toJSON();
+                    json.schemas.push(schema.toJSON());
                 }
             }
 
@@ -201,6 +201,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             for (i = 0; i < schemas.length; i++) {
                 var schema = schemas[i];
                 Schema.fromJSON(schema);
+            }
+
+            if (schemaOnly) {
+                return;
             }
         }
     });
@@ -322,6 +326,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     namespace.extend(Schema, {
         fromJSON: function (json) {
             var schema = new Schema(json.name);
+
+            for (var propName in json.props) {
+                if (json.props.hasOwnProperty(propName)) {
+                    schema._addProp(propName,
+                                    Property.fromJSON(json.props[propName]));
+                }
+            }
         }
     });
 
@@ -471,6 +482,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             // Relation properties are unambiguously Instance
             // references - so we can just persist the instance id.
             return value._id;
+        }
+    });
+
+    namespace.extend(Property, {
+        fromJSON: function(json) {
+            return new Property(json.name, json.schema,
+                                json.defaultValue, json.card);
         }
     });
 
