@@ -48,7 +48,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     function Property(name, schemaName, defaultValue, card, relationship) {
         this.name = name;
         this.schemaName = schemaName;
-        this.defaultValue = defaultValue;
+        if (defaultValue != undefined) {
+            this.defaultValue = defaultValue;
+        }
         if (card == undefined) {
             card = 'one';
         }
@@ -199,8 +201,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             var schemas = json.schemas;
             for (i = 0; i < schemas.length; i++) {
-                var schema = schemas[i];
-                Schema.fromJSON(schema);
+                Schema.fromJSON(schemas[i]);
+            }
+
+            var relationships = json.relationships;
+            for (i = 0; i < relationships.length; i++) {
+                Relationship.fromJSON(relationships[i]);
             }
 
             if (schemaOnly) {
@@ -308,14 +314,14 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         toJSON: function() {
             var json = {
                 'name': this.name,
-                'props': {}
+                'props': []
             };
 
             for (var propName in this.props) {
                 if (this.props.hasOwnProperty(propName)) {
                     var prop = this.props[propName];
                     if (!prop.relationship) {
-                        json.props[propName] = prop.toJSON();
+                        json.props.push(prop.toJSON());
                     }
                 }
             }
@@ -323,7 +329,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         }
     });
 
-    namespace.extend(Schema, {
+    util.extendObject(Schema, {
         fromJSON: function (json) {
             var schema = new Schema(json.name);
 
@@ -447,12 +453,14 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
         toJSON: function() {
             var json = {
-                'defaultValue': this.defaultValue,
-                'schema': this.schemaName,
-                'card': this.card
+                'name': this.name,
+                'schema': this.schemaName
             };
-            if (this.relationship) {
-                json.name = this.name;
+            if (this.defaultValue) {
+                json.defaultValue = this.defaultValue;
+            }
+            if (this.card != 'one') {
+                json.card = this.card;
             }
             return json;
         },
@@ -485,7 +493,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         }
     });
 
-    namespace.extend(Property, {
+    util.extendObject(Property, {
         fromJSON: function(json) {
             return new Property(json.name, json.schema,
                                 json.defaultValue, json.card);
@@ -521,6 +529,19 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         toJSON: function() {
             return [this.props[0].toJSON(),
                     this.props[1].toJSON()];
+        }
+    });
+
+    util.extendObject(Relationship, {
+        fromJSON: function(json) {
+            var propLeft = json[0];
+            var propRight = json[1];
+            var options = {
+                names: [propLeft.name, propRight.name],
+                cards: [propLeft.card, propRight.card],
+                defaultValues: [propLeft.defaultValue, propRight.defaultValue]
+            };
+            return new Relationship(propLeft.schema, propRight.schema, options);
         }
     });
 
