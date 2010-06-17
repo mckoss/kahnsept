@@ -339,6 +339,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var s = JSON.stringify(w.toJSON(), undefined, 4);
             ut.assertEq(typeof s, 'string');
             console.log(s);
+            var s2 = JSON.stringify(JSON.parse(s), undefined, 4);
+            ut.assertEq(s, s2);
         });
     }
 
