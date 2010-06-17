@@ -338,11 +338,14 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
             var s = JSON.stringify(w.toJSON(), undefined, 4);
             ut.assertEq(typeof s, 'string');
-            var s2 = JSON.stringify(JSON.parse(s), undefined, 4);
+            console.log(s);
+
+            var json = JSON.parse(s);
+            var s2 = JSON.stringify(json, undefined, 4);
             ut.assertEq(s, s2);
 
             var w2 = new kahnsept.World();
-            w2.importJSON(JSON.parse(s));
+            w2.importJSON(json);
             var s3 = JSON.stringify(w2.toJSON(), undefined, 4);
             ut.assertEq(s, s3);
             console.log(s3);
