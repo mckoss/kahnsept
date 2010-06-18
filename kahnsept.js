@@ -312,7 +312,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 return values;
             }
 
-            // In the import case, we can create instances from their id numbers
+            // In the import case, we can create a stub object as a forward
+            // reference.
             if (typeof values == 'string') {
                 values = {'_key': values};
             }
@@ -320,6 +321,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 values = {};
             }
 
+            // Be sure to get the same instance if we're importing a
+            // specific key.
             var i = this.world.createInstance(this, values._key);
             var name;
             var prop;
@@ -329,10 +332,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             for (name in this.props) {
                 if (this.props.hasOwnProperty(name)) {
                     prop = this.props[name];
-                    if (prop.card == 'many') {
+                    if (prop.card == 'many' && i[name] == undefined) {
                         i[name] = [];
                     }
-                    if (prop.defaultValue != undefined) {
+                    if (prop.defaultValue != undefined && !prop.hasValue(i)) {
                         prop.setValue(i, prop.defaultValue);
                     }
                 }
@@ -455,6 +458,14 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 var otherProp = this.relationship.otherProp(this);
                 otherProp.setValue(value, instance, true);
             }
+        },
+
+        hasValue: function(instance) {
+            if (this.card == 'one') {
+                return instance[this.name] != undefined;
+            }
+
+            return instance[this.name].length > 0;
         },
 
         indexValue: function(instance, value) {

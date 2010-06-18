@@ -362,6 +362,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var w2 = new kahnsept.World();
             w2.importJSON(json);
             var json2 = w2.toJSON();
+            var s3 = JSON.stringify(json2, undefined, 4);
+            console.log(s3);
 
             ut.assertEq(json.schemas, json2.schemas);
             ut.assertEq(json.relationships, json2.relationships);
@@ -378,7 +380,9 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
                 var key = json.instances[i]._key;
                 for (j = 0; j < json2.instances.length; j++) {
                     if (json2.instances[j]._key == key) {
-                        ut.assertEq(json.instances[i], json2.instances[j]);
+                        ut.assertEq(json.instances[i], json2.instances[j],
+                                    json.instances[i]._key + ' != ' +
+                                    json2.instances[j]._key);
                         break;
                     }
                 }
@@ -386,10 +390,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
                           "Key " + key + " not found.");
             }
 
-            var s3 = JSON.stringify(w2.toJSON(), undefined, 4);
-            console.log(s3);
             //ut.assertEq(s, s3);
-        });
+        }).breakOn(-1);
     }
 
     ns.addTests = addTests;
