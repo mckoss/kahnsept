@@ -23,13 +23,13 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assert(w != undefined);
 
             // New schemas are assigned to most recent world
-            var s = new kahnsept.Schema('test');
+            var s = w.createSchema('test');
             ut.assertIdent(s.world, w);
         });
 
         ts.addTest("Schema", function(ut) {
             var w = new kahnsept.World();
-            var s = new kahnsept.Schema('test');
+            var s = w.createSchema('test');
             // Name of Schema can be assigned
             ut.assertEq(s.name, 'test');
             // Schemas have no props when created
@@ -61,7 +61,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("Instances", function(ut) {
             var w = new kahnsept.World();
-            var s = new kahnsept.Schema('test');
+            var s = w.createSchema('test');
             s.addProp("s1", "String");
             s.addProp("n1", "Number");
             s.addProp("b1", "Boolean");
@@ -101,7 +101,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("Property type conversion", function(ut) {
             var w = new kahnsept.World();
-            var s = new kahnsept.Schema('test');
+            var s = w.createSchema('test');
             s.addProp("s1", "String");
             s.addProp("n1", "Number");
             s.addProp("b1", "Boolean");
@@ -129,7 +129,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("Multi-valued properties", function(ut) {
             var w = new kahnsept.World();
-            var s = new kahnsept.Schema('test');
+            var s = w.createSchema('test');
             s.addProp("s1", "String", undefined, 'many');
             s.addProp("s2", "String", undefined, 'many');
 
@@ -146,11 +146,11 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("Complex Schema", function(ut) {
             var w = new kahnsept.World();
-            var coord = new kahnsept.Schema('coordinate');
+            var coord = w.createSchema('coordinate');
             coord.addProp("x", "Number");
             coord.addProp("y", "Number");
 
-            var t = new kahnsept.Schema('test');
+            var t = w.createSchema('test');
             t.addProp("p1", "coordinate");
 
             var t1 = t.createInstance();
@@ -165,11 +165,11 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("Default properties", function(ut) {
             var w = new kahnsept.World();
-            var coord = new kahnsept.Schema('Coordinate');
+            var coord = w.createSchema('Coordinate');
             coord.addProp("x", "Number");
             coord.addProp("y", "Number");
 
-            var s = new kahnsept.Schema('test');
+            var s = w.createSchema('test');
             s.addProp("s1", "String", "default");
             s.addProp("n1", "Number", 123);
             s.addProp("b1", "Boolean", false);
@@ -199,7 +199,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("Kahnsept Video Demo", function(ut) {
             var w = new kahnsept.World();
-            var person = new kahnsept.Schema('Person');
+            var person = w.createSchema('Person');
             person.addProp('name');
             person.addProp('age', 'Number');
 
@@ -236,8 +236,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("delProp", function(ut) {
             var w = new kahnsept.World();
-            var person = new kahnsept.Schema('person');
-            var address = new kahnsept.Schema('address');
+            var person = w.createSchema('person');
+            var address = w.createSchema('address');
 
             person.addProp('residence', 'address', undefined, 'one');
 
@@ -252,8 +252,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("One to Many", function(ut) {
             var w = new kahnsept.World();
-            var parent = new kahnsept.Schema('Parent');
-            var child = new kahnsept.Schema('Child');
+            var parent = w.createSchema('Parent');
+            var child = w.createSchema('Child');
 
             new kahnsept.Relationship('Child', 'Parent',
                                       {'cards': ['one', 'many']});
@@ -286,8 +286,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("Many to Many", function(ut) {
             var w = new kahnsept.World();
-            var model = new kahnsept.Schema('Model');
-            var color = new kahnsept.Schema('Color');
+            var model = w.createSchema('Model');
+            var color = w.createSchema('Color');
 
             new kahnsept.Relationship('Color', 'Model',
                                       {'cards': ['many', 'many']});
@@ -313,7 +313,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         ts.addTest("JSON", function(ut) {
             var w = new kahnsept.World();
-            var person = new kahnsept.Schema('Person');
+            var person = w.createSchema('Person');
             person.addProp('name');
             person.addProp('age', 'Number');
 
@@ -349,7 +349,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var json2 = w2.toJSON();
 
             ut.assertEq(json.schemas, json2.schemas);
-            //ut.assertEq(json.relationships, json2.relationships);
+            ut.assertEq(json.relationships, json2.relationships);
+            ut.assertEq(json.instances, json2.instances);
 
             var s3 = JSON.stringify(w2.toJSON(), undefined, 4);
             console.log(s3);
