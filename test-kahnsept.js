@@ -311,6 +311,21 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(c2.model.length, 2);
         });
 
+        function undefinedProps(obj) {
+            var undefs = [];
+            for (var prop in obj) {
+                if (obj.hasOwnProperty(prop)) {
+                    if (obj[prop] == undefined) {
+                        undefs.push(prop);
+                    }
+                }
+            }
+            if (undefs.length > 0) {
+                return undefs;
+            }
+            return undefined;
+        }
+
         ts.addTest("JSON", function(ut) {
             var w = new kahnsept.World();
             var person = w.createSchema('Person');
@@ -350,7 +365,26 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
             ut.assertEq(json.schemas, json2.schemas);
             ut.assertEq(json.relationships, json2.relationships);
-            ut.assertEq(json.instances, json2.instances);
+            ut.assertEq(json.instances.length, json2.instances.length);
+
+            var i;
+            var j;
+            for (j = 0; j < json2.instances.length; j++) {
+                var undefs = undefinedProps(json2.instances[j]);
+                ut.assertEq(undefs, undefined, undefs);
+            }
+
+            for (i = 0; i < json.instances.length; i++) {
+                var key = json.instances[i]._key;
+                for (j = 0; j < json2.instances.length; j++) {
+                    if (json2.instances[j]._key == key) {
+                        ut.assertEq(json.instances[i], json2.instances[j]);
+                        break;
+                    }
+                }
+                ut.assert(j < json2.instances.length,
+                          "Key " + key + " not found.");
+            }
 
             var s3 = JSON.stringify(w2.toJSON(), undefined, 4);
             console.log(s3);

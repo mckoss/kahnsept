@@ -342,7 +342,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             for (name in values) {
                 if (values.hasOwnProperty(name) && name[0] != '_') {
                     prop = this.props[name];
-                    prop.setValue(i, values[name]);
+                    if (values[name] != undefined) {
+                        prop.setValue(i, values[name]);
+                    }
                 }
             }
             return i;
@@ -429,16 +431,24 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             // Convert the initial value to the correct type.
-            value = schema.createInstance(value);
+            if (value != undefined) {
+                value = schema.createInstance(value);
+            }
 
             // Multi-valued property.
             if (this.card == 'many') {
-                instance[this.name].push(value);
+                if (value != undefined) {
+                    instance[this.name].push(value);
+                }
             }
             // Single-valued property.
             else {
                 this.removeValue(instance, instance[this.name]);
-                instance[this.name] = value;
+                if (value == undefined) {
+                    delete instance[this.name];
+                } else {
+                    instance[this.name] = value;
+                }
             }
 
             if (this.relationship && !fOneOnly) {
@@ -475,7 +485,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (i == undefined) {
                 return;
             } else if (i === true) {
-                instance[this.name] = undefined;
+                delete instance[this.name];
             } else {
                 var values = instance[this.name];
                 values.splice(i, 1);
@@ -604,7 +614,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             for (var propName in schema.props) {
                 if (schema.props.hasOwnProperty(propName)) {
                     var prop = schema.props[propName];
-                    json[propName] = prop.getJSON(this);
+                    var value = prop.getJSON(this);
+                    if (value != undefined) {
+                        json[propName] = value;
+                    }
                 }
             }
             return json;
