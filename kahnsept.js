@@ -58,8 +58,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     // BuiltIn - A Schema sub-class to represent the built-in property
     // types in Kahnsept.
-    function BuiltIn(name, world) {
-        Schema.call(this, name, world);
+    function BuiltIn(name) {
+        Schema.call(this, name);
     }
 
     BuiltIn.prototype = new Schema('dummy');
@@ -136,18 +136,23 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         init: function() {
             for (var type in BuiltIn.types) {
                 if (BuiltIn.types.hasOwnProperty(type)) {
-                    new BuiltIn(type, this);
+                    this.addSchema(new BuiltIn(type));
                 }
             }
         },
 
         // Add a new schema to the World.
         createSchema: function(schemaName) {
-            if (this.schemas[schemaName] != undefined) {
-                throw new Error("Schema " + schemaName + " exists.");
-            }
+            return this.addSchema(new Schema(schemaName));
+        },
 
-            return this.schemas[schemaName] = new Schema(schemaName);
+        addSchema: function(schema) {
+            if (this.schemas[schema.name] != undefined) {
+                throw new Error("Schema " + schema.name + " exists.");
+            }
+            this.schemas[schema.name] = schema;
+            schema.world = this;
+            return schema;
         },
 
         createInstance: function(schema, id) {
@@ -345,11 +350,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         fromJSON: function (json) {
             var schema = currentWorld.createSchema(json.name);
 
-            for (var propName in json.props) {
-                if (json.props.hasOwnProperty(propName)) {
-                    schema._addProp(propName,
-                                    Property.fromJSON(json.props[propName]));
-                }
+            for (var i = 0; i < json.props.length; i++) {
+                var propName = json.props[i].name;
+                schema._addProp(propName,
+                                Property.fromJSON(json.props[i]));
             }
         }
     });
