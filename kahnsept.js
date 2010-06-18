@@ -11,10 +11,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         currentWorld = this;
         this.schemas = {};
         this.relationships = [];
-        this.instances = [];
-
-        // Next unique id for instances.
-        this.idNext = 0;
+        this.instances = {};
 
         // Used to map id's for importJSON.
         this.importMap = {};
@@ -72,9 +69,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     // Instance - An instance is a collection of property name/value pairs which
     // conform to a Schema definition.
-    function Instance(schema, id) {
+    function Instance(schema, key) {
         this._schema = schema;
-        this._id = id;
+        this._key = key;
     }
 
     // Relationship - Relationships are "bi-directional" properties.
@@ -155,20 +152,35 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return schema;
         },
 
+        generateKey: function(schema, keyHint) {
+            // Generate an instance key - use the keyHint if possible (not
+            // used).
+            if (keyHint != undefined && this.instances[keyHint] == undefined) {
+                return keyHint;
+            }
+
+            // Review: Keys should NEVER repeat or be duplicately generated
+            // independently.
+            var ms = new Date().getTime();
+            var rand = Math.random().toString().substr(2);
+            return schema.name + '|' + ms + '|' + rand;
+        },
+
         //
-        createInstance: function(schema, id) {
+        createInstance: function(schema, key) {
             // REVIEW: Try to preserve stability of the instance id's?
             var i;
 
-            if (id != undefined && this.importMap[id]) {
-                return this.importMap[id];
+            if (key != undefined && this.importMap[key]) {
+                return this.importMap[key];
             }
 
-            i = new Instance(schema, this.idNext++);
-            this.instances.push(i);
+            var newKey = this.generateKey(schema, key);
+            i = new Instance(schema, newKey);
+            this.instances[newKey] = i;
 
-            if (id != undefined) {
-                this.importMap[id] = i;
+            if (key != undefined) {
+                this.importMap[key] = i;
             }
             return i;
         },
@@ -178,8 +190,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var json = {
                 schemas: [],
                 relationships: [],
-                instances: [],
-                idNext: this.idNext
+                instances: []
             };
 
             for (var schemaName in this.schemas) {
@@ -198,9 +209,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 json.relationships.push(relationship.toJSON());
             }
 
-            for (i = 0; i < this.instances.length; i++) {
-                var instance = this.instances[i];
-                json.instances.push(instance.toJSON());
+            for (var key in this.instances) {
+                if (this.instances.hasOwnProperty(key)) {
+                    var instance = this.instances[key];
+                    json.instances.push(instance.toJSON());
+                }
             }
             return json;
         },
@@ -300,14 +313,14 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             // In the import case, we can create instances from their id numbers
-            if (typeof values == 'number') {
-                values = {'_id': values};
+            if (typeof values == 'string') {
+                values = {'_key': values};
             }
             else if (values == undefined) {
                 values = {};
             }
 
-            var i = this.world.createInstance(this, values._id);
+            var i = this.world.createInstance(this, values._key);
             var name;
             var prop;
 
@@ -511,8 +524,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             // Relation properties are unambiguously Instance
-            // references - so we can just persist the instance id.
-            return value._id;
+            // references - so we can just persist the instance key.
+            return value._key;
         }
     });
 
@@ -585,7 +598,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             var json = {
                 '_schema': schema.name,
-                '_id': this._id
+                '_key': this._key
             };
 
             for (var propName in schema.props) {
