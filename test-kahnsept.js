@@ -380,9 +380,6 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
                 var key = json.instances[i]._key;
                 for (j = 0; j < json2.instances.length; j++) {
                     if (json2.instances[j]._key == key) {
-                        ut.assertEq(json.instances[i], json2.instances[j],
-                                    json.instances[i]._key + ' != ' +
-                                    json2.instances[j]._key);
                         break;
                     }
                 }

@@ -72,7 +72,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     function Instance(schema, key) {
         this._schema = schema;
         this._key = key;
+        this._sequence = Instance.sequence++;
+        console.log(this._key + '.' + this._sequence);
     }
+
+    Instance.sequence = 0;
 
     // Relationship - Relationships are "bi-directional" properties.
     // Usage:
@@ -426,16 +430,16 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("Undefined schema: " + this.schemaName);
             }
 
+            // Convert the initial value to the correct type.
+            if (value != undefined) {
+                value = schema.createInstance(value);
+            }
+
             i = this.indexValue(instance, value);
 
             // Setting an existing value is a no-op.
             if (i != undefined) {
                 return;
-            }
-
-            // Convert the initial value to the correct type.
-            if (value != undefined) {
-                value = schema.createInstance(value);
             }
 
             // Multi-valued property.
