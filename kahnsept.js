@@ -155,18 +155,21 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return schema;
         },
 
+        //
         createInstance: function(schema, id) {
-            if (id == undefined) {
-                return new Instance(schema, this.idNext++);
-            }
+            // REVIEW: Try to preserve stability of the instance id's?
+            var i;
 
-            if (this.importMap[id]) {
+            if (id != undefined && this.importMap[id]) {
                 return this.importMap[id];
             }
 
-            // REVIEW: Try to preserve stability of the instance id's
-            var i = new Instance(schema, this.idNext++);
-            this.importMap[id] = i;
+            i = new Instance(schema, this.idNext++);
+            this.instances.push(i);
+
+            if (id != undefined) {
+                this.importMap[id] = i;
+            }
             return i;
         },
 
@@ -225,7 +228,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             var instances = json.instances;
             for (i = 0; i < instances.length; i++) {
-                Instance.fromJSON(instances[0]);
+                Instance.fromJSON(instances[i]);
             }
 
             delete this.importMap;
@@ -296,11 +299,17 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 return values;
             }
 
-            var i = this.world.createInstance(this);
+            // In the import case, we can create instances from their id numbers
+            if (typeof values == 'number') {
+                values = {'_id': values};
+            }
+            else if (values == undefined) {
+                values = {};
+            }
+
+            var i = this.world.createInstance(this, values._id);
             var name;
             var prop;
-
-            this.world.instances.push(i);
 
             // Set default property values and initialize multi-valued
             // properties to empty array.
@@ -317,12 +326,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             // Initialize other properties as passed in createInstance
-            if (values != undefined) {
-                for (name in values) {
-                    if (values.hasOwnProperty(name) && name[0] != '_') {
-                        prop = this.props[name];
-                        prop.setValue(i, values[name]);
-                    }
+            for (name in values) {
+                if (values.hasOwnProperty(name) && name[0] != '_') {
+                    prop = this.props[name];
+                    prop.setValue(i, values[name]);
                 }
             }
             return i;
