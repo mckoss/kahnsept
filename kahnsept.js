@@ -16,22 +16,16 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         // Next unique id for instances.
         this.idNext = 0;
 
+        // Used to map id's for importJSON.
+        this.importMap = {};
+
         this.init();
     }
 
     // Schema - A definition for a Kahnsept "object". Contains a
     // collection of allowed properties.
-    function Schema(name, world) {
-        if (typeof name != 'string') {
-            throw new Error("Invalid schema name: " + name);
-        }
+    function Schema(name) {
         this.name = name;
-        if (world == undefined) {
-            world = currentWorld;
-        }
-        if (world) {
-            world.addSchema(this);
-        }
         this.props = {};
     }
 
@@ -78,9 +72,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     // Instance - An instance is a collection of property name/value pairs which
     // conform to a Schema definition.
-    function Instance(schema) {
+    function Instance(schema, id) {
         this._schema = schema;
-        this._id = currentWorld.idNext++;
+        this._id = id;
     }
 
     // Relationship - Relationships are "bi-directional" properties.
@@ -148,18 +142,27 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         },
 
         // Add a new schema to the World.
-        addSchema: function(schema) {
-            if (!(schema instanceof Schema)) {
-                throw new Error("Invalid schema: " + schema);
+        createSchema: function(schemaName) {
+            if (this.schemas[schemaName] != undefined) {
+                throw new Error("Schema " + schemaName + " exists.");
             }
 
-            var s = this.schemas[schema.name];
-            if (s != undefined) {
-                throw new Error("Schema " + schema.name + " exists.");
+            return this.schemas[schemaName] = new Schema(schemaName);
+        },
+
+        createInstance: function(schema, id) {
+            if (id == undefined) {
+                return new Instance(schema, this.idNext++);
             }
 
-            this.schemas[schema.name] = schema;
-            schema.world = this;
+            if (this.importMap[id]) {
+                return this.importMap[id];
+            }
+
+            // REVIEW: Try to preserve stability of the instance id's
+            var i = new Instance(schema, this.idNext++);
+            this.importMap[id] = i;
+            return i;
         },
 
         toJSON: function() {
@@ -199,6 +202,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         importJSON: function(json, schemaOnly) {
             var i;
 
+            this.importMap = {};
+
             var schemas = json.schemas;
             for (i = 0; i < schemas.length; i++) {
                 Schema.fromJSON(schemas[i]);
@@ -212,6 +217,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (schemaOnly) {
                 return;
             }
+
+            var instances = json.instances;
+            for (i = 0; i < instances.length; i++) {
+                Instance.fromJSON(instances[0]);
+            }
+
+            delete this.importMap;
         }
     });
 
@@ -279,7 +291,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 return values;
             }
 
-            var i = new Instance(this);
+            var i = this.world.createInstance(this);
             var name;
             var prop;
 
@@ -331,7 +343,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     util.extendObject(Schema, {
         fromJSON: function (json) {
-            var schema = new Schema(json.name);
+            var schema = currentWorld.createSchema(json.name);
 
             for (var propName in json.props) {
                 if (json.props.hasOwnProperty(propName)) {
@@ -572,6 +584,16 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 }
             }
             return json;
+        }
+    });
+
+    util.extendObject(Instance, {
+        fromJSON: function(json) {
+            var schema = currentWorld.schemas[json._schema];
+            if (schema == undefined) {
+                throw new Error("No such schema: " + json._schema);
+            }
+            return schema.createInstance(json);
         }
     });
 
