@@ -72,11 +72,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     function Instance(schema, key) {
         this._schema = schema;
         this._key = key;
-        this._sequence = Instance.sequence++;
-        console.log(this._key + '.' + this._sequence);
     }
-
-    Instance.sequence = 0;
 
     // Relationship - Relationships are "bi-directional" properties.
     // Usage:
@@ -170,7 +166,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return schema.name + '|' + ms + '|' + rand;
         },
 
-        //
+        schemaFromKey: function(key) {
+            var parts = key.split('|');
+            return this.schemas[parts[0]];
+        },
+
         createInstance: function(schema, key) {
             // REVIEW: Try to preserve stability of the instance id's?
             var i;
@@ -622,7 +622,6 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var schema = this._schema;
 
             var json = {
-                '_schema': schema.name,
                 '_key': this._key
             };
 
@@ -641,7 +640,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     util.extendObject(Instance, {
         fromJSON: function(json) {
-            var schema = currentWorld.schemas[json._schema];
+            var schema = currentWorld.schemaFromKey(json._key);
             if (schema == undefined) {
                 throw new Error("No such schema: " + json._schema);
             }
