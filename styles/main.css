@@ -79,3 +79,8 @@ input[type="button"] {
 font-size: 24px;
 margin: 5px;
 }
+
+#json {
+white-space: pre;
+font-size: 12px;
+}
