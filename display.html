@@ -14,15 +14,15 @@ src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
 <script type="text/javascript" src="main.js"></script>
 <script type="text/javascript" src="jquery-ui-1.8.2.custom.min.js"></script>
 <script type="text/javascript" src="kahnsept.js"></script>
-<script type="text/javascript" src=http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-5487/?callback=loadDatabase"></script>
+
 <script type="text/javascript">
-var kahnsept = namespace.lookup("com.pageforest.examples.kahnsept");
-$(document).ready(loadDatabase);
+var kahnsept = namespace.lookup("com.pageforest.kahnsept");
 
 var world = new kahnsept.World();
 
+
 function loadDatabase(json) {
-	world.importJSON(json);
+	world.importJSON(json.blob);
     $("#schemalist").append('<h3>Schema List</h3><ol>');
 	for(prop in world.schemas){
 		$("#schemalist").append('<li>'+prop+'</li>');
@@ -32,7 +32,7 @@ function loadDatabase(json) {
 
 </script>
 
-
+<script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-5487/?callback=loadDatabase"></script>
 <style>
 
 div.schemalist {
