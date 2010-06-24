@@ -21,15 +21,19 @@ var kahnsept = namespace.lookup("com.pageforest.kahnsept");
 var world = new kahnsept.World();
 
 
+
 function loadDatabase(json) {
 	world.importJSON(json.blob);
-    $("#schemalist").append('<h3>Schema List</h3><ol>');
+}
+
+function onReady() {
+    $("#schemalist").append('<h3>Schema List</h3>');
 	for(prop in world.schemas){
 		$("#schemalist").append('<li>'+prop+'</li>');
 	}
 	$("#schemalist").append('<li><input type="button" value="New Schema" /></li></ol>'); 
 };
-
+$(document).ready(onReady);
 </script>
 
 <script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-5487/?callback=loadDatabase"></script>
