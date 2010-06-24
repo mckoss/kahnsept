@@ -3,8 +3,7 @@ namespace.lookup('com.pageforest.examples.kahnsept').defineOnce(function (ns) {
     var base = namespace.lookup('org.startpad.base');
     var schemas = new Array();
     var schemaTitles = new Array();
-    
-    
+
     // Initialize the document - create a client helper object
     function onReady() {
         $('#title').focus();
@@ -18,7 +17,7 @@ namespace.lookup('com.pageforest.examples.kahnsept').defineOnce(function (ns) {
     function setDoc(json) {
         $('#title').val(json.title);
         if(json.blob.schemas)
-        	schemas = json.blob.schemas;
+            schemas = json.blob.schemas;
         displaySchema();
     }
 
@@ -28,8 +27,8 @@ namespace.lookup('com.pageforest.examples.kahnsept').defineOnce(function (ns) {
         return {
             'title': $('#title').val(),
             'blob': {
-    		'schemas': schemas,
-    	},
+            'schemas': schemas,
+        },
         };
     }
 
@@ -81,147 +80,147 @@ namespace.lookup('com.pageforest.examples.kahnsept').defineOnce(function (ns) {
         $('#app-details').attr('href', 'http://' + ns.client.wwwHost +
                                '/apps/' + ns.client.appid);
     }
-    
+
     function displaySchema() {
-    	$('#schemas').empty();
-    	schemaTitles = base.map(schemas, function(v){return v.title});
-    	
-    	for(i = 0; i < schemas.length; i++)
-    		{	
-    		if(schemas[i].expanded == true){
-    		$('#schemas').append('<div><input id="txtS'+i+'" type="text" value="'+schemas[i].title+'" style="width:300px" /><input type="button" value="Save" onclick="kahnsept.colSchema('+i+');" /><input type="button" value="Delete" onclick="kahnsept.delSchema('+i+')" /><ul>');
-    		
-	    		
-	    		
-	    		for(j = 0; j < schemas[i].props.length; j++)
-	    		{
-	    			$('#schemas').append('<li><div><input type="text" value="' + schemas[i].props[j].propname +
-	    					'" style="width:300px" id="props' + i + 'p' + j + '" /><input type="text" value="' + schemas[i].props[j].accepted +
-	    					'" style="width:300px" id="acpts' + i + 'p' + j + '"/><input type="button" value="Del" onclick="kahnsept.delProp('+i+" , "+j+')"></div></li>');
-	    			var autotemp = $('#acpts' + i + 'p' + j);
-		    		autotemp.autocomplete({source : schemaTitles});
-	    		}
-	    		
-	    			
-	    			
-    			
-    			 $('#schemas').append('<li>Add Property<input type="button" value="Add" onclick="kahnsept.addProp('+ i + ');" /></li></ul></div>');
-	    		
-	    		
-    		} 
-    		else {
-    			$('#schemas').append('<div>'+schemas[i].title+'<input type="button" value="Edit" onclick="kahnsept.expSchema('+i+');" /></div>');
-    			}
-    		}
-    	
-    	displayInst();
+        $('#schemas').empty();
+        schemaTitles = base.map(schemas, function(v){return v.title});
+
+        for(i = 0; i < schemas.length; i++)
+            {
+            if(schemas[i].expanded == true){
+            $('#schemas').append('<div><input id="txtS'+i+'" type="text" value="'+schemas[i].title+'" style="width:300px" /><input type="button" value="Save" onclick="kahnsept.colSchema('+i+');" /><input type="button" value="Delete" onclick="kahnsept.delSchema('+i+')" /><ul>');
+
+
+
+                for(j = 0; j < schemas[i].props.length; j++)
+                {
+                    $('#schemas').append('<li><div><input type="text" value="' + schemas[i].props[j].propname +
+                            '" style="width:300px" id="props' + i + 'p' + j + '" /><input type="text" value="' + schemas[i].props[j].accepted +
+                            '" style="width:300px" id="acpts' + i + 'p' + j + '"/><input type="button" value="Del" onclick="kahnsept.delProp('+i+" , "+j+')"></div></li>');
+                    var autotemp = $('#acpts' + i + 'p' + j);
+                    autotemp.autocomplete({source : schemaTitles});
+                }
+
+
+
+
+                 $('#schemas').append('<li>Add Property<input type="button" value="Add" onclick="kahnsept.addProp('+ i + ');" /></li></ul></div>');
+
+
+            }
+            else {
+                $('#schemas').append('<div>'+schemas[i].title+'<input type="button" value="Edit" onclick="kahnsept.expSchema('+i+');" /></div>');
+                }
+            }
+
+        displayInst();
     }
-    
+
     function addSchema() {
-    	saveText();
-    	schemas.push({ "title": "NewSchema", "props": new Array({"propname" : "Title" , "accepted" : "Text"}), "instances": new Array(), "expanded": true, "instexp": true});
-		displaySchema();
+        saveText();
+        schemas.push({ "title": "NewSchema", "props": new Array({"propname" : "Title" , "accepted" : "Text"}), "instances": new Array(), "expanded": true, "instexp": true});
+        displaySchema();
     }
-    
+
     function delSchema(schemanum) {
-    	saveText();
-    	schemas.splice(schemanum, 1);
-    	displaySchema();
+        saveText();
+        schemas.splice(schemanum, 1);
+        displaySchema();
     }
-    
+
     function addProp(schemanum){
-    	saveText();
-    	schemas[schemanum].props.push({"propname" : "NewPropName" , "accepted" : "Accepted Schema"});
-    	displaySchema();
+        saveText();
+        schemas[schemanum].props.push({"propname" : "NewPropName" , "accepted" : "Accepted Schema"});
+        displaySchema();
     }
-    
+
     function delProp(schemanum, propnum){
-    	saveText();
-    	schemas[schemanum].props.splice(propnum, 1);
-    	displaySchema();
+        saveText();
+        schemas[schemanum].props.splice(propnum, 1);
+        displaySchema();
     }
-    
+
     function displayInst(){
-    	$('#instances').empty();
-    	pile = "";
-    	for(i=0;i<schemas.length;i++){
-    		if(schemas[i].instexp == true){
-	    		pile += ('<li>'+schemas[i].title+' ('+schemas[i].instances.length+') <input type="button" value="Save" onclick="kahnsept.colInst('+i+');" /><ul>');
-	    		for(j=0;j<schemas[i].instances.length;j++){
-	    			pile+=('<li>Property : Accepted Schemas <input type="button" value="Delete" onclick="kahnsept.delInst('+i+','+j+');" /><ul>');
-	    			for(k=0;k<schemas[i].props.length;k++){
-	    				temp = schemas[i].props[k].accepted;
-	    				if (schemas[i].instances[j][schemas[i].props[k].propname])
-	    					temp = schemas[i].instances[j][schemas[i].props[k].propname];
-    						    				
-	    				pile+=('<li>'+schemas[i].props[k].propname+'<input type="text" value="'+temp+'" id="s'+i+'i'+j+'p'+k+'" style="width:300px" /></li>');
-	    			}
-	    			pile+= ('</ul></li>');
-	    		}
-	    		pile+=('<li><input type="button" value="Add Instance" onclick="kahnsept.addInst('+i+')" /></li></ul></li>');
-    		}
-    		else {
-    			pile += ('<li>'+schemas[i].title+' ('+schemas[i].instances.length+') <input type="button" value="Edit" onclick="kahnsept.expInst('+i+');" /></li>');
-    		}
-    	}
-    	$('#instances').append(pile);
+        $('#instances').empty();
+        pile = "";
+        for(i=0;i<schemas.length;i++){
+            if(schemas[i].instexp == true){
+                pile += ('<li>'+schemas[i].title+' ('+schemas[i].instances.length+') <input type="button" value="Save" onclick="kahnsept.colInst('+i+');" /><ul>');
+                for(j=0;j<schemas[i].instances.length;j++){
+                    pile+=('<li>Property : Accepted Schemas <input type="button" value="Delete" onclick="kahnsept.delInst('+i+','+j+');" /><ul>');
+                    for(k=0;k<schemas[i].props.length;k++){
+                        temp = schemas[i].props[k].accepted;
+                        if (schemas[i].instances[j][schemas[i].props[k].propname])
+                            temp = schemas[i].instances[j][schemas[i].props[k].propname];
+
+                        pile+=('<li>'+schemas[i].props[k].propname+'<input type="text" value="'+temp+'" id="s'+i+'i'+j+'p'+k+'" style="width:300px" /></li>');
+                    }
+                    pile+= ('</ul></li>');
+                }
+                pile+=('<li><input type="button" value="Add Instance" onclick="kahnsept.addInst('+i+')" /></li></ul></li>');
+            }
+            else {
+                pile += ('<li>'+schemas[i].title+' ('+schemas[i].instances.length+') <input type="button" value="Edit" onclick="kahnsept.expInst('+i+');" /></li>');
+            }
+        }
+        $('#instances').append(pile);
     }
-    
+
     function addInst(schemanum){
-    	saveText();
-    	schemas[schemanum].instances.push({"title": ('instance of '+schemas[schemanum].title+'')});
-    	displayInst();
+        saveText();
+        schemas[schemanum].instances.push({"title": ('instance of '+schemas[schemanum].title+'')});
+        displayInst();
     }
-    
+
     function delInst(schemanum, instnum){
-    	saveText();
-    	schemas[schemanum].instances.splice(instnum, 1);
-    	displayInst();
+        saveText();
+        schemas[schemanum].instances.splice(instnum, 1);
+        displayInst();
     }
-    
+
     function expSchema(schemanum){
-    	saveText();
-    	schemas[schemanum].expanded = true;
-    	displaySchema();
+        saveText();
+        schemas[schemanum].expanded = true;
+        displaySchema();
     }
-    
+
     function colSchema(schemanum){
-    	saveText();
-    	schemas[schemanum].expanded = false;
-    	displaySchema();
+        saveText();
+        schemas[schemanum].expanded = false;
+        displaySchema();
     }
-    
+
     function expInst(schemanum){
-    	schemas[schemanum].instexp = true;
-    	displaySchema();
+        schemas[schemanum].instexp = true;
+        displaySchema();
     }
-    
+
     function colInst(schemanum){
-    	saveText();
-    	schemas[schemanum].instexp = false;
-    	displaySchema();
+        saveText();
+        schemas[schemanum].instexp = false;
+        displaySchema();
     }
-    
+
     function saveText() {
-    	for(i=0;i<schemas.length;i++){
-    				   		
-	    	   		for(j=0;j<schemas[i].props.length;j++){
-	    	   			if(schemas[i].expanded == true){
-	    	   				schemas[i].props[j].propname = $('#props'+i+'p'+j+'').val();
-	    	   				schemas[i].props[j].accepted = $('#acpts'+i+'p'+j+'').val();
-	    	   			}
-	    	   			
-		    	   		for(k=0;k<schemas[i].instances.length;k++){
-		    	   			schemas[i].instances[k][schemas[i].props[j].propname] = $('#s'+i+'i'+k+'p'+j+'').val();
-		    	   			
-		    	   			//Need to add code to read and save all of the instance values
-		    	   		}
-	    	   		}
-	    	   		if(schemas[i].expanded)
-	    	   			schemas[i].title = $('#txtS'+i).val();
-    			
-    	}
-    	getDoc();
+        for(i=0;i<schemas.length;i++){
+
+                    for(j=0;j<schemas[i].props.length;j++){
+                        if(schemas[i].expanded == true){
+                            schemas[i].props[j].propname = $('#props'+i+'p'+j+'').val();
+                            schemas[i].props[j].accepted = $('#acpts'+i+'p'+j+'').val();
+                        }
+
+                        for(k=0;k<schemas[i].instances.length;k++){
+                            schemas[i].instances[k][schemas[i].props[j].propname] = $('#s'+i+'i'+k+'p'+j+'').val();
+
+                            //Need to add code to read and save all of the instance values
+                        }
+                    }
+                    if(schemas[i].expanded)
+                        schemas[i].title = $('#txtS'+i).val();
+
+        }
+        getDoc();
     }
 
     // Exported functions
