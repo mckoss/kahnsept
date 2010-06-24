@@ -19,24 +19,40 @@ src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
 var kahnsept = namespace.lookup("com.pageforest.kahnsept");
 
 var world = new kahnsept.World();
-
+var selectedSchema = "Person";
 
 
 function loadDatabase(json) {
 	world.importJSON(json.blob);
-}
+};
 
 function onReady() {
-    $("#schemalist").append('<h3>Schema List</h3>');
-	for(prop in world.schemas){
-		$("#schemalist").append('<li>'+prop+'</li>');
+    var prop;
+	
+    $("#schemaList").append('<h3>Schema List</h3><ol>');
+	for(var schema in world.schemas){
+	    if(schema == selectedSchema)
+	    	  $("#schemaList").append('<li>'+schema+'</li>');
+	    else
+	    	$("#schemaList").append('<li><a href="">'+schema+'</a></li>');
+
+	    
 	}
-	$("#schemalist").append('<li><input type="button" value="New Schema" /></li></ol>'); 
+	$("#schemaList").append('<li><input type="button" value="New Schema" /></li></ol>'); 
+
+	$("#defTitle").append('<h3>'+world.schemas[selectedSchema].name+' Definition</h3>');
+
+	for(var propName in world.schemas[selectedSchema].props) {
+		var prop = world.schemas[selectedSchema].props[propName];
+        $("#schemaDefinition").append('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+
+                       '<div class="editDeleteButtons"><input type="button" value="Edit" /><input type="button" value="Delete" /></div></div>');
+    }
 };
+
 $(document).ready(onReady);
 </script>
 
-<script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-5487/?callback=loadDatabase"></script>
+<script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-6452/?callback=loadDatabase"></script>
 <style>
 
 div.schemalist {
@@ -94,52 +110,20 @@ background-color:#0000FF;
 <body>
 
 
-<div class="schemalist" id="schemalist">
+<div class="schemalist" id="schemaList">
 	
 </div>
 
-<div class="schemaDefinitionTitle">
-	<h3> Schema 1 Definition</h3>
+<div class="schemaDefinitionTitle" id="defTitle">
+	
 </div>
 
-<div class="schemaDefinition">
-	<div class="schemaDefinitionLine">
-		Relationship 1 Name: Accepted Value
-		<div class="editDeleteButtons">
-			<input type="button" value="Edit" />
-			<input type="button" value="Delete" />
-		</div>
-	</div>
+<div class="schemaDefinition" id="schemaDefinition">
 	
-	<div class="schemaDefinitionLine">
-		Relationship 2 Name: Accepted Value
-		<div class="editDeleteButtons">
-			<input type="button" value="Edit" />
-			<input type="button" value="Delete" />
-		</div>
-	</div>
+	
+	
 
-	<div class="schemaDefinitionLine">
-		Proptery Name: String
-		<div class="editDeleteButtons">
-			<input type="button" value="Edit" />
-			<input type="button" value="Delete" />
-		</div>
-	</div><div class="schemaDefinitionLine">
-		Property Name2: Number
-		<div class="editDeleteButtons">
-			<input type="button" value="Edit" />
-			<input type="button" value="Delete" />
-		</div>
-	</div><div class="schemaDefinitionLine">
-		Property Name 3: Boolean
-		<div class="editDeleteButtons">
-			<input type="button" value="Edit" />
-			<input type="button" value="Delete" />
-		</div>
-	</div>
-
-	</div>
+	
 </div>
 
 <div class="instanceBox">
