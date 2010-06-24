@@ -602,7 +602,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 cards: [propLeft.card, propRight.card],
                 defaultValues: [propLeft.defaultValue, propRight.defaultValue]
             };
-            return new Relationship(propLeft.schema, propRight.schema, options);
+            return new Relationship(propRight.schema, propLeft.schema, options);
         }
     });
 
