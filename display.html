@@ -1,0 +1,200 @@
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<title>KAHNSEPT</title>
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.all.css" />
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.autocomplete.css" />
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.base.css" />
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.core.css" />
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.theme.css" />
+<script type="text/javascript"
+src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="/lib/0.6/js/json2.min.js"></script>
+<script type="text/javascript" src="/lib/0.6/js/utils.js"></script>
+<script type="text/javascript" src="main.js"></script>
+<script type="text/javascript" src="jquery-ui-1.8.2.custom.min.js"></script>
+<script type="text/javascript" src="kahnsept.js"></script>
+
+<script type="text/javascript">
+var kahnsept = namespace.lookup("com.pageforest.kahnsept");
+
+var world = new kahnsept.World();
+var selectedSchema = "Person";
+
+
+function loadDatabase(json) {
+	world.importJSON(json.blob);
+};
+
+function onReady() {
+    var prop;
+	
+    $("#schemaList").append('<h3>Schema List</h3><ol>');
+	for(var schema in world.schemas){
+	    if(schema == selectedSchema)
+	    	  $("#schemaList").append('<li>'+schema+'</li>');
+	    else
+	    	$("#schemaList").append('<li><a href="">'+schema+'</a></li>');
+
+	    
+	}
+	$("#schemaList").append('<li><input type="button" value="New Schema" /></li></ol>'); 
+
+	$("#defTitle").append('<h3>'+world.schemas[selectedSchema].name+' Definition</h3>');
+
+	for(var propName in world.schemas[selectedSchema].props) {
+		var prop = world.schemas[selectedSchema].props[propName];
+        $("#schemaDefinition").append('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+
+                       '<div class="editDeleteButtons"><input type="button" value="Edit" /><input type="button" value="Delete" /></div></div>');
+    }
+};
+
+$(document).ready(onReady);
+</script>
+
+<script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-6452/?callback=loadDatabase"></script>
+<style>
+
+div.schemalist {
+background-color:#00FF00; 
+width:150px; 
+height:100%; 
+float:left;
+}
+
+div.schemaDefinitionTitle {
+background-color:#FF0000; 
+width:850px; 
+height:50px; 
+float:left;
+text-align:center;
+}
+
+div.schemaDefinition {
+background-color:#0000FF; 
+width:850px; 
+
+float:left;
+text-align:center;
+}
+
+div.instanceBox {
+background-color:#FFFF00; 
+width:850px; 
+height:1000px; 
+float:left;
+text-align:left;
+}
+
+div.schemaDefinitionLine {
+background-color:#00FFFF; 
+width:850px; 
+
+float:left;
+text-align:left;
+}
+
+div.editDeleteButtons {
+background-color:#009900; 
+
+float:right;
+}
+
+div.instance {
+background-color:#0000FF;
+
+}
+
+</style>
+</head>
+<body>
+
+
+<div class="schemalist" id="schemaList">
+	
+</div>
+
+<div class="schemaDefinitionTitle" id="defTitle">
+	
+</div>
+
+<div class="schemaDefinition" id="schemaDefinition">
+	
+	
+	
+
+	
+</div>
+
+<div class="instanceBox">
+<ol>
+	<li><div class="instance">
+		<div class="editDeleteButtons">
+			<input type="button" value="Edit" />
+			<input type="button" value="Delete" />
+		</div>
+		<h3>Instance 1 Name</h3>
+		<ol><li>Relationship 1 Name: Value</li>
+		<li>Relationship 2 Name : Value</li>
+		<li>Property Name : "ThisisaString"</li>
+		<li>Property Name2 : 9</li>
+		<li>Property Name3: true</li>
+		</ol>		
+	</div></li>
+	<li><div class="instance">
+		<div class="editDeleteButtons">
+			<input type="button" value="Edit" />
+			<input type="button" value="Delete" />
+		</div>
+		<h3>Instance 2 Name</h3>
+		<ol><li>Relationship 1 Name: Value</li>
+		<li>Relationship 2 Name : Value</li>
+		<li>Property Name : "ThisisaString"</li>
+		<li>Property Name2 : 9</li>
+		<li>Property Name3: true</li>
+		</ol>		
+	</div></li>
+	<li><div class="instance">
+		<div class="editDeleteButtons">
+			<input type="button" value="Save" />
+			<input type="button" value="Reset" />
+		</div>
+		<h3>Instance 3 Name</h3>
+		<ol><li>Relationship 1 Name: <select name="rel1">
+			<option>Schema1</option>
+			<option>Schema2</option>
+			<option>Schema3</option>
+			<option>Schema4</option>
+			<option>Schema5</option>
+			</select>
+			<select name="rel1">
+			<option>Schema1</option>
+			<option>Schema2</option>
+			<option>Schema3</option>
+			<option>Schema4</option>
+			<option>Schema5</option>
+			</select></li>
+		<li>Relationship 2 Name : <select name="rel2">
+			<option>Schema1</option>
+			<option>Schema2</option>
+			<option>Schema3</option>
+			<option>Schema4</option>
+			<option>Schema5</option>
+			</select></li>
+		<li>Property Name : <input type="textbox" value="ThisisaString" /></li>
+		<li>Property Name2 : <input type="textbox" value=9 /></li>
+		<li>Property Name3: <select name="bool">
+			<option>True</option>
+			<option>False</option>
+			</select></li>
+		</ol>		
+	</div></li>
+</ol>
+<input type="button" value="Create New Instance">
+</div>
+
+
+
+
+</body>
+</html>
