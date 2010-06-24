@@ -1,0 +1,15 @@
+syntax: glob
+
+*.pyc
+.svn/*
+*.log
+*~
+\#*\#
+*.orig
+*.pass
+tidy.html
+TAGS
+nosetests.xml
+coverage.xml
+.coverage
+.passwd
