@@ -19,40 +19,114 @@ src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
 var kahnsept = namespace.lookup("com.pageforest.kahnsept");
 
 var world = new kahnsept.World();
-var selectedSchema = "Person";
+var selectedSchema;
+var editingProp = null;
 
 
 function loadDatabase(json) {
 	world.importJSON(json.blob);
+	selectedSchema= world.schemas["Person"];
 };
 
+
 function onReady() {
+    display();
+}
+
+function display() {
+	$("#schemaList").empty();
+	$("#defTitle").empty();
+	$("#schemaDefinition").empty();
+	$("#instanceBox").empty();
     var prop;
 	
     $("#schemaList").append('<h3>Schema List</h3><ol>');
-	for(var schema in world.schemas){
+	for(var key in world.schemas){
+	    var schema = world.schemas[key];
 	    if(schema == selectedSchema)
-	    	  $("#schemaList").append('<li>'+schema+'</li>');
+	    	  $("#schemaList").append('<li>'+schema.name+'</li>');
 	    else
-	    	$("#schemaList").append('<li><a href="">'+schema+'</a></li>');
+	    	$("#schemaList").append('<li><a href="#" onClick="selectSchema('+schema.name+');">'+schema.name+'</a></li>');
 
 	    
 	}
-	$("#schemaList").append('<li><input type="button" value="New Schema" /></li></ol>'); 
+	$("#schemaList").append('</ol><input type="textbox" id="newSchemaName"'+
+			' value="New Schema Name" /><br><input type="button" value="Create"'+
+			' onClick="createSchema();" />'); 
 
-	$("#defTitle").append('<h3>'+world.schemas[selectedSchema].name+' Definition</h3>');
+	$("#defTitle").append('<h3 style="width:750px; height:45px; float:left;">'+selectedSchema.name+
+			' Definition</h3><div style="float:left; margin-top:15px;">'+
+			'<input type="button" value="Delete" onClick="deleteSchema();" /></div>');
 
-	for(var propName in world.schemas[selectedSchema].props) {
-		var prop = world.schemas[selectedSchema].props[propName];
-        $("#schemaDefinition").append('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+
-                       '<div class="editDeleteButtons"><input type="button" value="Edit" /><input type="button" value="Delete" /></div></div>');
+	for(var propName in selectedSchema.props) {
+		var prop = selectedSchema.props[propName];
+	    if(editingProp == propName) {
+	    	$("#schemaDefinition").append('<div class="schemaDefinitionLine">Property Name:'+
+	    	    	' <input type="textbox" value="'+prop.name+'" id="propName" /> '+prop.schemaName+
+	    	        '<div class="editDeleteButtons"><input type="button" value="Save" '+
+	    	        'onclick="saveProp();" /><input type="button" value="Reset" /></div></div>');
+	    }
+		else {
+		   $("#schemaDefinition").append('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+
+                       '<div class="editDeleteButtons"><input type="button" value="Edit" onclick="editProp(\''+prop.name+
+                       '\');" /><input type="button" value="Delete" /></div></div>');
+		}
     }
+    var instString = "<ol>";
+    //$("#instanceBox").append("<ol>");
+
+    var instances = [];//NEED TO BUILD!!!
+
+    for(var key in world.instances) {
+        var inst = world.instances[key];
+        if(inst._schema.name == selectedSchema.name) {
+            instances.push(inst);
+        }
+    }
+    
+    for(i=0;i<instances.length;i++) {
+        instString += ('<li><div class="instance"><div class="editDeleteButtons"><input type="button" value="Edit" />' +
+                '<input type="button" value="Delete" /></div><h3>Instance '+(i+1)+'</h3><ol>');  
+        for(var propName in selectedSchema.props) {
+             var prop = selectedSchema.props[propName];
+             instString += ('<li>'+prop.name+':  '+instances[i][prop.name]);
+        }
+        instString += ('</ol></div></li>');
+    }
+
+    $("#instanceBox").append(instString);
+
+};
+
+function createSchema() {
+    world.createSchema($("#newSchemaName").val());
+    display();
+};
+
+function selectSchema(schemaName) {
+	selectedSchema = world.schemas[schemaName];
+	display();
+};
+
+function deleteSchema() {
+	alert("Delete Schema method must be written in kahnsept.js before button can be hooked up");
+};
+
+function editProp(propName) {
+	editingProp = propName;
+	display();
+};
+
+function saveProp() {
+	selectedSchema.props[editingProp].name = $("#propName").val();
+	editingProp = null;
+	display();
 };
 
 $(document).ready(onReady);
 </script>
 
-<script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-6452/?callback=loadDatabase"></script>
+<script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-7615/?callback=loadDatabase"></script>
 <style>
 
 div.schemalist {
@@ -126,34 +200,9 @@ background-color:#0000FF;
 	
 </div>
 
-<div class="instanceBox">
-<ol>
-	<li><div class="instance">
-		<div class="editDeleteButtons">
-			<input type="button" value="Edit" />
-			<input type="button" value="Delete" />
-		</div>
-		<h3>Instance 1 Name</h3>
-		<ol><li>Relationship 1 Name: Value</li>
-		<li>Relationship 2 Name : Value</li>
-		<li>Property Name : "ThisisaString"</li>
-		<li>Property Name2 : 9</li>
-		<li>Property Name3: true</li>
-		</ol>		
-	</div></li>
-	<li><div class="instance">
-		<div class="editDeleteButtons">
-			<input type="button" value="Edit" />
-			<input type="button" value="Delete" />
-		</div>
-		<h3>Instance 2 Name</h3>
-		<ol><li>Relationship 1 Name: Value</li>
-		<li>Relationship 2 Name : Value</li>
-		<li>Property Name : "ThisisaString"</li>
-		<li>Property Name2 : 9</li>
-		<li>Property Name3: true</li>
-		</ol>		
-	</div></li>
+<div class="instanceBox" id="instanceBox">
+
+    <!--  
 	<li><div class="instance">
 		<div class="editDeleteButtons">
 			<input type="button" value="Save" />
@@ -189,8 +238,11 @@ background-color:#0000FF;
 			</select></li>
 		</ol>		
 	</div></li>
+	<input type="button" value="Create New Instance">
+	-->
 </ol>
-<input type="button" value="Create New Instance">
+
+
 </div>
 
 
