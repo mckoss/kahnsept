@@ -60,17 +60,30 @@ function display() {
 
 	for(var propName in selectedSchema.props) {
 		var prop = selectedSchema.props[propName];
+		var schemaDefStr = "";
 	    if(editingProp == propName) {
-	    	$("#schemaDefinition").append('<div class="schemaDefinitionLine">Property Name:'+
-	    	    	' <input type="textbox" value="'+prop.name+'" id="propName" /> '+prop.schemaName+
-	    	        '<div class="editDeleteButtons"><input type="button" value="Save" '+
-	    	        'onclick="saveProp();" /><input type="button" value="Reset" /></div></div>');
+		    var dropDownStr = "";
+	    	schemaDefStr += ('<div class="schemaDefinitionLine">Property Name:'+
+	    	    	' <input type="textbox" value="'+prop.name+'" id="propName" />Accepted Schema: <select>');
+	    	for(var key in world.schemas) {
+		    	var schema = world.schemas[key];
+	    		if(schema.name == prop.schemaName) {
+	    			dropDownStr += ('<option value="'+schema.name+'" selected="selected">'+schema.name+'</option>');
+	    		}
+	    		else {
+	    			dropDownStr += ('<option value="'+schema.name+'">'+schema.name+'</option>');
+	    		}
+	    	}
+	    	schemaDefStr += (dropDownStr);
+	    	schemaDefStr += ('</select><div class="editDeleteButtons"><input type="button" value="Save" '+
+	    	        'onclick="saveProp();" /><input type="button" value="Reset" onClick="resetProp();" /></div></div>');
 	    }
 		else {
-		   $("#schemaDefinition").append('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+
+		   schemaDefStr += ('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+
                        '<div class="editDeleteButtons"><input type="button" value="Edit" onclick="editProp(\''+prop.name+
-                       '\');" /><input type="button" value="Delete" /></div></div>');
+                       '\');" /><input type="button" value="Delete" onClick="delProp(\''+prop.name+'\');" /></div></div>');
 		}
+	    $("#schemaDefinition").append(schemaDefStr);
     }
     var instString = "<ol>";
     //$("#instanceBox").append("<ol>");
@@ -113,13 +126,26 @@ function deleteSchema() {
 };
 
 function editProp(propName) {
-	editingProp = propName;
+    editingProp = propName;
+
+	//editingProp.renameProp(propName);
 	display();
 };
 
 function saveProp() {
-	selectedSchema.props[editingProp].name = $("#propName").val();
+	//selectedSchema.props[editingProp].name = $("#propName").val();
+	alert("need to implement property rename function in kahnsept.js");
 	editingProp = null;
+	display();
+};
+
+function resetProp() {
+	editingProp = null;
+	display();
+};
+
+function delProp(propName) {
+	selectedSchema.delProp(propName);
 	display();
 };
 
