@@ -407,7 +407,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     Query.methods({
         // Number of Instances in the result (if fetch() where called).
         count: function() {
-            return this.schema.count;
+            // TODO: Kind of wasteful to dispose of a potentially large array.
+            return this.fetch().length;
         },
 
         fetch: function(count) {
@@ -418,12 +419,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var a = [];
             var instances = this.schema.instances;
 
+            instanceLoop:
             for (var i = 1; i < instances.length; i++) {
                 if (instances[i] != undefined) {
                     var inst = instances[i];
                     for (var j = 0; j < this.filters.length; j++) {
                         if (!this.filters[j].call(inst)) {
-                            continue;
+                            continue instanceLoop;
                         }
                     }
 
