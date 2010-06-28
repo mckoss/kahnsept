@@ -390,6 +390,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     BuiltIn.methods({
         // For BuiltIn's, we just convert the initial value to the
         // corresponding JavaScript value type.
+        // TODO: Should have better error checking and throw on errors.
         createInstance: function(value) {
             switch (this.name) {
             case 'String':
