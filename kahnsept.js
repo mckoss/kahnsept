@@ -24,6 +24,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     function Schema(name) {
         this.name = name;
         this.props = {};
+        this.idNext = 1;
+        this.instances = [];
+        this.count = 0;
+    }
+
+    function Query(schema) {
+        this.schema = schema;
     }
 
     // Property - Defintion for a single property in an Schema.  Can
@@ -327,7 +334,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             // Be sure to get the same instance if we're importing a
             // specific key.
-            var i = this.world.createInstance(this, values._key);
+            var inst = this.world.createInstance(this, values._key);
+
+            // Each new instance gets a unique (local) id number
+            this.instances[this.idNext] = inst;
+            this.count++;
+            inst._id = this.idNext++;
+
             var name;
             var prop;
 
@@ -336,25 +349,23 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             for (name in this.props) {
                 if (this.props.hasOwnProperty(name)) {
                     prop = this.props[name];
-                    if (prop.card == 'many' && i[name] == undefined) {
-                        i[name] = [];
+                    if (prop.card == 'many' && inst[name] == undefined) {
+                        inst[name] = [];
                     }
-                    if (prop.defaultValue != undefined && !prop.hasValue(i)) {
-                        prop.setValue(i, prop.defaultValue);
+                    if (prop.defaultValue != undefined &&
+                        !prop.hasValue(inst)) {
+                        prop.setValue(inst, prop.defaultValue);
                     }
                 }
             }
 
-            // Initialize other properties as passed in createInstance
-            for (name in values) {
-                if (values.hasOwnProperty(name) && name[0] != '_') {
-                    prop = this.props[name];
-                    if (values[name] != undefined) {
-                        prop.setValue(i, values[name]);
-                    }
-                }
-            }
-            return i;
+            inst.setValues(values);
+
+            return inst;
+        },
+
+        query: function() {
+            return new Query(this);
         },
 
         toJSON: function() {
@@ -384,6 +395,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 schema._addProp(propName,
                                 Property.fromJSON(json.props[i]));
             }
+        }
+    });
+
+    Query.methods({
+        count: function() {
+            return this.schema.count;
         }
     });
 
@@ -617,6 +634,22 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             prop.setValue(this, value);
+        },
+
+        // Set one or more values defined in values Object
+        setValues: function(values) {
+            for (var name in values) {
+                if (values.hasOwnProperty(name) && name[0] != '_') {
+                    this.setProp(name, values[name]);
+                }
+            }
+        },
+
+        getTitle: function() {
+            if (this.title) {
+                return this.title;
+            }
+            return this._schema.name + this._id;
         },
 
         toJSON: function() {

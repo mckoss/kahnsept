@@ -70,6 +70,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var obj = s.createInstance();
             ut.assertEq(typeof obj, 'object');
             ut.assert(obj instanceof kahnsept.Instance);
+            ut.assertEq(obj._id, 1);
+            ut.assertEq(obj.getTitle(), "test1");
 
             obj.setProp("s1", "hello");
             ut.assertEq(typeof obj.s1, 'string');
@@ -97,6 +99,27 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
                 ut.assertException(e, "does not exist");
             }
             ut.assert(fThrows);
+        });
+
+        ts.addTest("Schema.query", function(ut) {
+            var w = new kahnsept.World();
+            var s = w.createSchema('test');
+            s.addProp('s1');
+            s.addProp("n1", "Number");
+            s.addProp("b1", "Boolean");
+            s.addProp("d1", "Date");
+
+            for (var i = 0; i < 10; i++) {
+                var inst = s.createInstance();
+                inst.setValues({
+                    's1': 'Object ' + i,
+                    'n1': i,
+                    'b1': i < 5,
+                    'd1': new Date(2010, 6, i)
+                });
+            }
+
+            ut.assertEq(s.query().count(), 10);
         });
 
         ts.addTest("Property type conversion", function(ut) {
