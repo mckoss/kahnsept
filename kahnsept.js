@@ -35,6 +35,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
     function Query(schema) {
         this.schema = schema;
+        this.filters = [];
     }
 
     // Property - Defintion for a single property in an Schema.  Can
@@ -419,7 +420,14 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             for (var i = 1; i < instances.length; i++) {
                 if (instances[i] != undefined) {
-                    a.push(instances[i]);
+                    var inst = instances[i];
+                    for (var j = 0; j < this.filters.length; j++) {
+                        if (!this.filters[j].call(inst)) {
+                            continue;
+                        }
+                    }
+
+                    a.push(inst);
                     if (--count <= 0) {
                         break;
                     }
@@ -438,7 +446,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         //   query.filter(fn)
         //     where fn(instance) returns true iff instance should be
         //     returned by the query
-        filter: function() {
+        filter: function(propOp, value) {
+            if (typeof propOp == 'function') {
+                this.filters.push(propOp);
+            }
             return this;
         }
     });

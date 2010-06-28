@@ -126,7 +126,9 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
                 ut.assertEq(a[i].getTitle(), 'Test' + (i + 1));
             }
 
-            var q = s.query().filter('n1 <', 5);
+            var q = s.query().filter(function() {
+                return this.n1 < 5;
+            });
             ut.assertEq(q.count(), 5);
             ut.assertEq(q.fetch().length, 5);
         });
