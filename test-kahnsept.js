@@ -388,7 +388,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             }
 
             //ut.assertEq(s, s3);
-        }).breakOn(-1);
+        });
+
     }
 
     ns.addTests = addTests;
