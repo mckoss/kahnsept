@@ -31,7 +31,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var w = new kahnsept.World();
             var s = w.createSchema('test');
             // Name of Schema can be assigned
-            ut.assertEq(s.name, 'test');
+            ut.assertEq(s.name, 'Test');
             // Schemas have no props when created
             ut.assertEq(base.keys(s.props).length, 0);
 
@@ -71,7 +71,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(typeof obj, 'object');
             ut.assert(obj instanceof kahnsept.Instance);
             ut.assertEq(obj._id, 1);
-            ut.assertEq(obj.getTitle(), "test1");
+            ut.assertEq(obj.getTitle(), "Test1");
 
             obj.setProp("s1", "hello");
             ut.assertEq(typeof obj.s1, 'string');
@@ -123,7 +123,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var a = s.query().fetch();
             ut.assertEq(a.length, 10);
             for (i = 0; i < 10; i++) {
-                ut.assertEq(a[i].getTitle(), 'test' + (i + 1));
+                ut.assertEq(a[i].getTitle(), 'Test' + (i + 1));
             }
 
             var q = s.query().filter('n1 <', 5);
@@ -183,12 +183,12 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             coord.addProp("y", "Number");
 
             var t = w.createSchema('test');
-            t.addProp("p1", "coordinate");
+            t.addProp("p1", "Coordinate");
 
             var t1 = t.createInstance();
             t1.setProp('p1', {'x': 10, 'y': 20});
             ut.assertEq(typeof t1.p1, 'object');
-            ut.assertEq(t1.p1._schema.name, 'coordinate');
+            ut.assertEq(t1.p1._schema.name, 'Coordinate');
             ut.assertEq(typeof t1.p1.x, 'number');
             ut.assertEq(t1.p1.x, 10);
             ut.assertEq(typeof t1.p1.y, 'number');
@@ -271,15 +271,15 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var person = w.createSchema('person');
             var address = w.createSchema('address');
 
-            person.addProp('residence', 'address', undefined, 'one');
+            person.addProp('residence', 'Address', undefined, 'one');
 
             ut.assert(person.props['residence'] != undefined);
             ut.assert(address.props['person'] != undefined);
 
             person.delProp('residence');
 
-            ut.assertEq(person.props['residence'], undefined);
-            ut.assertEq(address.props['person'], undefined);
+            ut.assertEq(person.props['residence'], undefined, 1);
+            ut.assertEq(address.props['person'], undefined, 2);
         });
 
         ts.addTest("One to Many", function(ut) {
@@ -420,7 +420,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             }
 
             //ut.assertEq(s, s3);
-        });
+        }).breakOn(-1);
 
     }
 

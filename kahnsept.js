@@ -13,6 +13,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         this.relationships = [];
         this.instances = {};
 
+        // Max number of Schema.fetch() results.
+        this.maxFetch = 10000;
+
         // Used to map id's for importJSON.
         this.importMap = {};
 
@@ -22,6 +25,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     // Schema - A definition for a Kahnsept "object". Contains a
     // collection of allowed properties.
     function Schema(name) {
+        name = name[0].toUpperCase() + name.substr(1);
         this.name = name;
         this.props = {};
         this.idNext = 1;
@@ -44,6 +48,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     //   object initializer (e.g., {'x': 1, 'y': 2}) - used to initialize
     //     a private copy of the property instance.
     function Property(name, schemaName, defaultValue, card, relationship) {
+        name = name[0].toLowerCase() + name.substr(1);
         this.name = name;
         this.schemaName = schemaName;
         if (defaultValue != undefined) {
@@ -100,7 +105,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
         for (i = 0; i < 2; i++) {
             if (this.names[i] == undefined) {
-                this.names[i] = this.schemaNames[1 - i].toLowerCase();
+                this.names[i] = this.schemaNames[1 - i];
             }
         }
 
@@ -117,8 +122,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                                              defaultValues[i],
                                              this.cards[i],
                                              this);
-
-                this.schemas[i]._addProp(this.names[i], this.props[i]);
+                this.names[i] = this.props[i].name;
+                this.schemas[i]._addProp(this.props[i]);
             }
             currentWorld.relationships.push(this);
         } catch (e) {
@@ -270,7 +275,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (schema instanceof BuiltIn) {
                 var prop = new Property(name, schemaName,
                                         defaultValue, card);
-                this._addProp(name, prop);
+                this._addProp(prop);
             }
             else {
                 new Relationship(this.name, schemaName,
@@ -283,7 +288,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         },
 
         // Internal function to register a property in the Schema.
-        _addProp: function (name, prop) {
+        _addProp: function (prop) {
+            var name = prop.name;
             if (this.props[name]) {
                 throw new Error("Property " + name + " exists.");
             }
@@ -392,8 +398,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             for (var i = 0; i < json.props.length; i++) {
                 var propName = json.props[i].name;
-                schema._addProp(propName,
-                                Property.fromJSON(json.props[i]));
+                schema._addProp(Property.fromJSON(json.props[i]));
             }
         }
     });
@@ -404,15 +409,37 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return this.schema.count;
         },
 
-        fetch: function() {
+        fetch: function(count) {
+            if (count != undefined) {
+                count = World.maxFetch;
+            }
+
             var a = [];
             var instances = this.schema.instances;
+
             for (var i = 1; i < instances.length; i++) {
                 if (instances[i] != undefined) {
                     a.push(instances[i]);
+                    if (--count <= 0) {
+                        break;
+                    }
                 }
             }
+
             return a;
+        },
+
+        // Modify the current query to be filtered.
+        // Usage:
+        //   query.filter('prop op', value)
+        //     where op is one of =, <, <=, >, >=, !=, 'contains', 'regex'
+        //     prop is is a property name or propery expression (e.g.,
+        //     prop.sub-prop)
+        //   query.filter(fn)
+        //     where fn(instance) returns true iff instance should be
+        //     returned by the query
+        filter: function() {
+            return this;
         }
     });
 
