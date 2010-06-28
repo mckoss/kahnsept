@@ -399,8 +399,20 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     });
 
     Query.methods({
+        // Number of Instances in the result (if fetch() where called).
         count: function() {
             return this.schema.count;
+        },
+
+        fetch: function() {
+            var a = [];
+            var instances = this.schema.instances;
+            for (var i = 1; i < instances.length; i++) {
+                if (instances[i] != undefined) {
+                    a.push(instances[i]);
+                }
+            }
+            return a;
         }
     });
 
