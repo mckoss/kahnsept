@@ -123,8 +123,12 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             var a = s.query().fetch();
             ut.assertEq(a.length, 10);
             for (i = 0; i < 10; i++) {
-                ut.assertEq(a[i].getTitle(), 'test' + (i+1));
+                ut.assertEq(a[i].getTitle(), 'test' + (i + 1));
             }
+
+            var q = s.query().filter('n1 <', 5);
+            ut.assertEq(q.count(), 5);
+            ut.assertEq(q.fetch().length, 5);
         });
 
         ts.addTest("Property type conversion", function(ut) {
