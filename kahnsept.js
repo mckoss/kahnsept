@@ -411,6 +411,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return this.fetch().length;
         },
 
+        get: function() {
+            return this.fetch(1)[0];
+        },
+
         fetch: function(count) {
             if (count != undefined) {
                 count = World.maxFetch;
@@ -461,44 +465,49 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             var propExp = propOp.substr(0, i);
             var op = propOp.substr(i + 1);
-            var regex;
-
-            var ops = {
-                '=': function() {
-                    return this[propExp] == value;
-                },
-                '<': function() {
-                    return this[propExp] < value;
-                },
-                '<=': function() {
-                    return this[propExp] <= value;
-                },
-                '>': function() {
-                    return this[propExp] > value;
-                },
-                '>=': function() {
-                    return this[propExp] >= value;
-                },
-                '!=': function() {
-                    return this[propExp] != value;
-                },
-                'contains': function() {
-                    var s = this[propExp].toString();
-                    return s.indexOf(value) != -1;
-                },
-                'like': function() {
-                    return this[propExp] < value;
-                },
-            };
-
-            var fn = ops[op];
+            var fn = Query.fnOps[op];
 
             if (fn == undefined) {
                 throw new Error("filter operator (" + op + ") not supported.");
             }
 
-            this.filters.push(fn);
+            function test() {
+                return fn(this[propExp], value);
+            }
+
+            this.filters.push(test);
             return this;
+        }
+    });
+
+    util.extendObject(Query, {
+        fnOps: {
+            '=': function(a, b) {
+                return a == b;
+            },
+            '<': function(a, b) {
+                return a < b;
+            },
+            '<=': function(a, b) {
+                return a <= b;
+            },
+            '>': function(a, b) {
+                return a > b;
+            },
+            '>=': function(a, b) {
+                return a >= b;
+            },
+            '!=': function(a, b) {
+                return a != b;
+            },
+            'contains': function(a, b) {
+                var s = a.toString();
+                return s.indexOf(b) != -1;
+            },
+            'like': function(a, b) {
+                // b should be a Regexp
+                return b.test(a);
+            }
         }
     });
 
