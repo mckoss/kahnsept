@@ -186,20 +186,25 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
         createInstance: function(schema, key) {
             // REVIEW: Try to preserve stability of the instance id's?
-            var i;
+            var inst;
 
             if (key != undefined && this.importMap[key]) {
                 return this.importMap[key];
             }
 
             var newKey = this.generateKey(schema, key);
-            i = new Instance(schema, newKey);
-            this.instances[newKey] = i;
+            inst = new Instance(schema, newKey);
+            this.instances[newKey] = inst;
 
             if (key != undefined) {
-                this.importMap[key] = i;
+                this.importMap[key] = inst;
             }
-            return i;
+            return inst;
+        },
+
+        // Remove an instance from the World key map.
+        deleteInstance: function(inst) {
+            delete this.instances[inst._key];
         },
 
         toJSON: function() {
@@ -301,6 +306,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         // Remove a property from this schema.  Note that we don't
         // not fix up any instances that may have been using this
         // property.
+        //
+        // TODO: Should provide the option to clean up orphaned properties
+        // in Instances.
         delProp: function(name, fOneOnly) {
             var prop = this.props[name];
             if (prop == undefined) {
@@ -369,6 +377,15 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             inst.setValues(values);
 
             return inst;
+        },
+
+        // To delete an instance, set remove all of its Relationship
+        // properties, and remove from the instance maps in the World
+        // and Schema.
+        deleteInstance: function(inst) {
+            this.world.deleteInstance(inst);
+            delete this.instances[inst._id];
+            this.count--;
         },
 
         query: function() {
@@ -452,6 +469,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         //   query.filter(fn)
         //     where fn(instance) returns true iff instance should be
         //     returned by the query
+        // TODO: Handle property expressions.
+        // TODO: Handle multi-values properties.
         filter: function(propOp, value) {
             if (typeof propOp == 'function') {
                 this.filters.push(propOp);
@@ -764,6 +783,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 return this.title;
             }
             return this._schema.name + this._id;
+        },
+
+        deleteInstance: function() {
+            this._schema.deleteInstance(this);
         },
 
         toJSON: function() {
