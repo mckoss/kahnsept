@@ -162,6 +162,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("Schema " + schemaName + " does not exist.");
             }
             var schema = this.schemas[schemaName];
+            if (schema instanceof BuiltIn) {
+                throw new Error("Can't delete BuiltIn Schema " +
+                                schemaName + ".");
+            }
             for (var i = 0; i < schema.instances.length; i++) {
                 var inst = schema.instances[i];
                 if (inst == undefined) {
