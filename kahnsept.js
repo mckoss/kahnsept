@@ -442,7 +442,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         // Modify the current query to be filtered.
         // Usage:
         //   query.filter('prop op', value)
-        //     where op is one of =, <, <=, >, >=, !=, 'contains', 'regex'
+        //     where op is one of =, <, <=, >, >=, !=, 'contains', 'like'
         //     prop is is a property name or propery expression (e.g.,
         //     prop.sub-prop)
         //   query.filter(fn)
@@ -451,7 +451,53 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         filter: function(propOp, value) {
             if (typeof propOp == 'function') {
                 this.filters.push(propOp);
+                return this;
             }
+
+            var i = propOp.indexOf(' ');
+            if (i == -1) {
+                throw new Error("filter syntax error: '" + propOp + "'");
+            }
+
+            var propExp = propOp.substr(0, i);
+            var op = propOp.substr(i + 1);
+            var regex;
+
+            var ops = {
+                '=': function() {
+                    return this[propExp] == value;
+                },
+                '<': function() {
+                    return this[propExp] < value;
+                },
+                '<=': function() {
+                    return this[propExp] <= value;
+                },
+                '>': function() {
+                    return this[propExp] > value;
+                },
+                '>=': function() {
+                    return this[propExp] >= value;
+                },
+                '!=': function() {
+                    return this[propExp] != value;
+                },
+                'contains': function() {
+                    var s = this[propExp].toString();
+                    return s.indexOf(value) != -1;
+                },
+                'like': function() {
+                    return this[propExp] < value;
+                },
+            };
+
+            var fn = ops[op];
+
+            if (fn == undefined) {
+                throw new Error("filter operator (" + op + ") not supported.");
+            }
+
+            this.filters.push(fn);
             return this;
         }
     });
