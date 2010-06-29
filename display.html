@@ -47,7 +47,7 @@ function display() {
 	    if(schema == selectedSchema)
 	    	  $("#schemaList").append('<li>'+schema.name+'</li>');
 	    else
-	    	$("#schemaList").append('<li><a href="#" onClick="selectSchema('+schema.name+');">'+schema.name+'</a></li>');
+	    	$("#schemaList").append('<li><a href="#" onClick="selectSchema(\''+schema.name+'\');">'+schema.name+'</a></li>');
 
 	    
 	}
@@ -109,11 +109,11 @@ function display() {
                         	   'field" type="textbox" value="'+instances[i][prop.name]+'" />');
                  }
                  else if(prop.schemaName == "Boolean") {
-                	 if(instances[i][prop.name] == "True") {
+                	 if(instances[i][prop.name] == "True" || instances[i][prop.name] == "true" ) {
 	                	 instString += ('<li>'+prop.name+':  <select id="'+propName+
 	                        	 'field"><option value="True" selected="yes">True</option><option value="False">False</option></select>');
                 	 }
-                	 if(instances[i][prop.name] == "False" || instances[i][prop.name] == undefined) {
+                	 if(instances[i][prop.name] == "False" || instances[i][prop.name] == "false" || instances[i][prop.name] == undefined) {
                          instString += ('<li>'+prop.name+':  <select id="'+propName+
                                  'field"><option value="True">True</option><option value="False" selected="yes">False</option></select>');
                      }
@@ -205,7 +205,7 @@ function resetInst() {
 $(document).ready(onReady);
 </script>
 
-<script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-7615/?callback=loadDatabase"></script>
+<script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-5597/?callback=loadDatabase"></script>
 <style>
 
 div.schemalist {
