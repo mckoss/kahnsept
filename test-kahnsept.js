@@ -109,8 +109,10 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             s.addProp("b1", "Boolean");
             s.addProp("d1", "Date");
 
+            var inst;
+
             for (var i = 0; i < 10; i++) {
-                var inst = s.createInstance();
+                inst = s.createInstance();
                 inst.setValues({
                     's1': 'Object ' + i,
                     'n1': i,
@@ -158,6 +160,10 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(s.query().filter('s1 contains', 'object').count(), 10);
             ut.assertEq(s.query().filter('s1 like', /[02468]$/).count(), 5);
             ut.assertEq(s.query().filter('s1 like', '[02468]$').count(), 5);
+
+            inst = s.query().get();
+            inst.deleteInstance();
+            ut.assertEq(s.query().count(), 9);
         });
 
         ts.addTest("Property type conversion", function(ut) {
