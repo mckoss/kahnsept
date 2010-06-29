@@ -134,8 +134,11 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
             q = s.query().filter('n1 <', 5);
             ut.assertEq(q.count(), 5);
-            ut.assertEq(q.fetch().length, 5);
 
+            a = s.query().filter('n1 <', 5).filter('n1 >', 2).fetch();
+            ut.assertEq(a.length, 2);
+            ut.assertEq(a[0].n1, 3);
+            ut.assertEq(a[1].n1, 4);
         });
 
         ts.addTest("Property type conversion", function(ut) {
