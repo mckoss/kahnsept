@@ -88,15 +88,11 @@ function display() {
     }
     var instString = "<ol>";
     //$("#instanceBox").append("<ol>");
+    
+    var query = selectedSchema.query();
+    instances = query.fetch();
 
-    instances = [];
-
-    for(var key in world.instances) {
-        var inst = world.instances[key];
-        if(inst._schema.name == selectedSchema.name) {
-            instances.push(inst);
-        }
-    }
+    
     
     for(i=0;i<instances.length;i++) {
         if(i == editingInstNum) {
@@ -138,7 +134,8 @@ function display() {
 	        instString += ('</ol></div></li>');
         }
     }
-
+    instString += ('<br><input type="button" value="Create New Instance" onClick="createInst() />');
+    
     $("#instanceBox").append(instString);
 
 };
@@ -187,7 +184,10 @@ function editInst(instNum) {
 };
 
 function delInst(instNum) {
-	alert("need to implement instance deletion in kahnsept.js");
+    instances[instNum].deleteInstance();
+    var query = selectedSchema.query();
+    instances = query.fetch();
+    display();
 };
 
 function saveInst() {
@@ -202,6 +202,16 @@ function resetInst() {
 	editingInstNum = null;
 	display();
 }
+
+function createInst() {
+    if(editingInstNum != null) {
+        saveInst();
+    }
+    editingInstNum = instances.length;
+    instances.push(selectedSchema.createInstance());
+	display();
+}
+
 $(document).ready(onReady);
 </script>
 
