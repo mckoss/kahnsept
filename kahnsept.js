@@ -383,6 +383,19 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         // properties, and remove from the instance maps in the World
         // and Schema.
         deleteInstance: function(inst) {
+            for (var name in this.props) {
+                if (this.props.hasOwnProperty(name)) {
+                    var prop = this.props[name];
+                    if (prop.card == 'one') {
+                        prop.removeValue(inst, inst[name]);
+                    }
+                    else {
+                        for (var i = 0; i < inst[name].length; i++) {
+                            prop.removeValue(inst, inst[name][i]);
+                        }
+                    }
+                }
+            }
             this.world.deleteInstance(inst);
             delete this.instances[inst._id];
             this.count--;
