@@ -62,6 +62,15 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             w.deleteSchema('Test');
             ut.assertEq(w.schemas['Test'], undefined);
             ut.assertEq(s.count, 0);
+
+            fThrows = false;
+            try {
+                w.deleteSchema('Number');
+            } catch (e2) {
+                fThrows = true;
+                ut.assertException(e2, "can't delete BuiltIn");
+            }
+            ut.assert(fThrows, "delete BuiltIn");
         });
 
         ts.addTest("Instances", function(ut) {
