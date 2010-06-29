@@ -57,6 +57,10 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             // Props can be deleted
             s.delProp('prop1');
             ut.assertEq(base.keys(s.props).length, 0);
+
+            ut.assert(w.schemas['Test'] != undefined);
+            w.deleteSchema('Test');
+            ut.assertEq(w.schemas['Test'], undefined);
         });
 
         ts.addTest("Instances", function(ut) {
