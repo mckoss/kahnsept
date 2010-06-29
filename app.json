@@ -1,0 +1,23 @@
+{
+ "application": "kahnsept",
+  "created": {
+    "__class__": "Date",
+    "isoformat": "2010-05-21T20:59:49.915171Z"
+  },
+  "modified": {
+    "__class__": "Date",
+    "isoformat": "2010-05-21T20:59:49.925142Z"
+  },
+  "owner": "cwkoss",
+  "readers": [
+    "public"
+  ],
+  "referers": [],
+  "tags": [],
+  "title": "Kahnsept Sample Application",
+  "url": "http://kahnsept.pageforest.com/",
+  "writers": [
+    "mike",
+    "mckoss"
+  ]
+}

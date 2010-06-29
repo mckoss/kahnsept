@@ -1,0 +1,341 @@
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<title>KAHNSEPT</title>
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.all.css" />
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.autocomplete.css" />
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.base.css" />
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.core.css" />
+<link rel="stylesheet" type="text/css" href="styles/jquery.ui.theme.css" />
+<script type="text/javascript"
+src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="/lib/0.6/js/json2.min.js"></script>
+<script type="text/javascript" src="/lib/0.6/js/utils.js"></script>
+<script type="text/javascript" src="main.js"></script>
+<script type="text/javascript" src="jquery-ui-1.8.2.custom.min.js"></script>
+<script type="text/javascript" src="kahnsept.js"></script>
+
+<script type="text/javascript">
+var kahnsept = namespace.lookup("com.pageforest.kahnsept");
+
+var world = new kahnsept.World();
+var selectedSchema;
+var editingProp = null;
+var editingInstNum = null;
+var instances = [];
+
+function loadDatabase(json) {
+	world.importJSON(json.blob);
+	selectedSchema= world.schemas["Person"];
+};
+
+
+function onReady() {
+    display();
+}
+
+function display() {
+	$("#schemaList").empty();
+	$("#defTitle").empty();
+	$("#schemaDefinition").empty();
+	$("#instanceBox").empty();
+    var prop;
+	
+    $("#schemaList").append('<h3>Schema List</h3><ol>');
+	for(var key in world.schemas){
+	    var schema = world.schemas[key];
+	    if(schema == selectedSchema)
+	    	  $("#schemaList").append('<li>'+schema.name+'</li>');
+	    else
+	    	$("#schemaList").append('<li><a href="#" onClick="selectSchema(\''+schema.name+'\');">'+schema.name+'</a></li>');
+
+	    
+	}
+	$("#schemaList").append('</ol><input type="textbox" id="newSchemaName"'+
+			' value="New Schema Name" /><br><input type="button" value="Create"'+
+			' onClick="createSchema();" />'); 
+
+	$("#defTitle").append('<h3 style="width:750px; height:45px; float:left;">'+selectedSchema.name+
+			' Definition</h3><div style="float:left; margin-top:15px;">'+
+			'<input type="button" value="Delete" onClick="deleteSchema();" /></div>');
+
+	for(var propName in selectedSchema.props) {
+		var prop = selectedSchema.props[propName];
+		var schemaDefStr = "";
+	    if(editingProp == propName) {
+		    var dropDownStr = "";
+	    	schemaDefStr += ('<div class="schemaDefinitionLine">Property Name:'+
+	    	    	' <input type="textbox" value="'+prop.name+'" id="propName" />Accepted Schema: <select>');
+	    	for(var key in world.schemas) {
+		    	var schema = world.schemas[key];
+	    		if(schema.name == prop.schemaName) {
+	    			dropDownStr += ('<option value="'+schema.name+'" selected="selected">'+schema.name+'</option>');
+	    		}
+	    		else {
+	    			dropDownStr += ('<option value="'+schema.name+'">'+schema.name+'</option>');
+	    		}
+	    	}
+	    	schemaDefStr += (dropDownStr);
+	    	schemaDefStr += ('</select><div class="editDeleteButtons"><input type="button" value="Save" '+
+	    	        'onclick="saveProp();" /><input type="button" value="Reset" onClick="resetProp();" /></div></div>');
+	    }
+		else {
+		   schemaDefStr += ('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+
+                       '<div class="editDeleteButtons"><input type="button" value="Edit" onclick="editProp(\''+prop.name+
+                       '\');" /><input type="button" value="Delete" onClick="delProp(\''+prop.name+'\');" /></div></div>');
+		}
+	    $("#schemaDefinition").append(schemaDefStr);
+    }
+    var instString = "<ol>";
+    //$("#instanceBox").append("<ol>");
+    
+    var query = selectedSchema.query();
+    instances = query.fetch();
+
+    
+    
+    for(i=0;i<instances.length;i++) {
+        if(i == editingInstNum) {
+        	instString += ('<li><div class="instance"><div class="editDeleteButtons"><input type="button" value="Save" onClick="saveInst();" />' +
+                    '<input type="button" value="Reset" onClick="resetInst();" /></div><h3>Instance '+i+'</h3><ol>');  
+            for(var propName in selectedSchema.props) {
+                 var prop = selectedSchema.props[propName];
+                 if(prop.schemaName == "String" || prop.schemaName == "Number") {
+                	   instString += ('<li>'+prop.name+':  <input id="'+propName+
+                        	   'field" type="textbox" value="'+instances[i][prop.name]+'" />');
+                 }
+                 else if(prop.schemaName == "Boolean") {
+                	 if(instances[i][prop.name] == "True" || instances[i][prop.name] == "true" ) {
+	                	 instString += ('<li>'+prop.name+':  <select id="'+propName+
+	                        	 'field"><option value="True" selected="yes">True</option><option value="False">False</option></select>');
+                	 }
+                	 if(instances[i][prop.name] == "False" || instances[i][prop.name] == "false" || instances[i][prop.name] == undefined) {
+                         instString += ('<li>'+prop.name+':  <select id="'+propName+
+                                 'field"><option value="True">True</option><option value="False" selected="yes">False</option></select>');
+                     }
+                 }
+                 else if(prop.schemaName == "Date") {
+                	 instString += ('<li>'+prop.name+':  Date picker not yet implemented');
+                 }
+                 else {
+                	 instString += ('<li>'+prop.name+':  Instance-in-schema picker not yet implemented');
+                 }
+            }
+            instString += ('</ol></div></li>');
+        }
+        else {
+	        instString += ('<li><div class="instance"><div class="editDeleteButtons"><input '+
+	    	        'type="button" value="Edit" onClick="editInst('+i+');" />' +
+	                '<input type="button" value="Delete" onClick="delInst('+i+');" /></div><h3>Instance '+i+'</h3><ol>');  
+	        for(var propName in selectedSchema.props) {
+	             var prop = selectedSchema.props[propName];
+	             instString += ('<li>'+prop.name+':  '+instances[i][prop.name]);
+	        }
+	        instString += ('</ol></div></li>');
+        }
+    }
+    instString += ('<br><input type="button" value="Create New Instance" onClick="createInst() />');
+    
+    $("#instanceBox").append(instString);
+
+};
+
+function createSchema() {
+    world.createSchema($("#newSchemaName").val());
+    display();
+};
+
+function selectSchema(schemaName) {
+	selectedSchema = world.schemas[schemaName];
+	display();
+};
+
+function deleteSchema() {
+	alert("Delete Schema method must be written in kahnsept.js before button can be hooked up");
+};
+
+function editProp(propName) {
+    editingProp = propName;
+
+	//editingProp.renameProp(propName);
+	display();
+};
+
+function delProp(propName) {
+	selectedSchema.delProp(propName);
+	display();
+};
+
+function saveProp() {
+    //selectedSchema.props[editingProp].name = $("#propName").val();
+    alert("need to implement property rename function in kahnsept.js");
+    editingProp = null;
+    display();
+};
+
+function resetProp() {
+    editingProp = null;
+    display();
+};
+
+function editInst(instNum) {
+	editingInstNum = instNum;
+	display();
+};
+
+function delInst(instNum) {
+    instances[instNum].deleteInstance();
+    var query = selectedSchema.query();
+    instances = query.fetch();
+    display();
+};
+
+function saveInst() {
+    for(var prop in selectedSchema.props) {
+        instances[editingInstNum][prop] = $("#"+prop+"field").val();
+    }
+    editingInstNum = null;
+    display();
+};
+
+function resetInst() {
+	editingInstNum = null;
+	display();
+}
+
+function createInst() {
+    if(editingInstNum != null) {
+        saveInst();
+    }
+    editingInstNum = instances.length;
+    instances.push(selectedSchema.createInstance());
+	display();
+}
+
+$(document).ready(onReady);
+</script>
+
+<script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-5597/?callback=loadDatabase"></script>
+<style>
+
+div.schemalist {
+background-color:#00FF00; 
+width:150px; 
+height:100%; 
+float:left;
+}
+
+div.schemaDefinitionTitle {
+background-color:#FF0000; 
+width:850px; 
+height:50px; 
+float:left;
+text-align:center;
+}
+
+div.schemaDefinition {
+background-color:#0000FF; 
+width:850px; 
+
+float:left;
+text-align:center;
+}
+
+div.instanceBox {
+background-color:#FFFF00; 
+width:850px; 
+height:1000px; 
+float:left;
+text-align:left;
+}
+
+div.schemaDefinitionLine {
+background-color:#00FFFF; 
+width:850px; 
+
+float:left;
+text-align:left;
+}
+
+div.editDeleteButtons {
+background-color:#009900; 
+
+float:right;
+}
+
+div.instance {
+background-color:#0000FF;
+
+}
+
+</style>
+</head>
+<body>
+
+
+<div class="schemalist" id="schemaList">
+	
+</div>
+
+<div class="schemaDefinitionTitle" id="defTitle">
+	
+</div>
+
+<div class="schemaDefinition" id="schemaDefinition">
+	
+	
+	
+
+	
+</div>
+
+<div class="instanceBox" id="instanceBox">
+
+    <!--  
+	<li><div class="instance">
+		<div class="editDeleteButtons">
+			<input type="button" value="Save" />
+			<input type="button" value="Reset" />
+		</div>
+		<h3>Instance 3 Name</h3>
+		<ol><li>Relationship 1 Name: <select name="rel1">
+			<option>Schema1</option>
+			<option>Schema2</option>
+			<option>Schema3</option>
+			<option>Schema4</option>
+			<option>Schema5</option>
+			</select>
+			<select name="rel1">
+			<option>Schema1</option>
+			<option>Schema2</option>
+			<option>Schema3</option>
+			<option>Schema4</option>
+			<option>Schema5</option>
+			</select></li>
+		<li>Relationship 2 Name : <select name="rel2">
+			<option>Schema1</option>
+			<option>Schema2</option>
+			<option>Schema3</option>
+			<option>Schema4</option>
+			<option>Schema5</option>
+			</select></li>
+		<li>Property Name : <input type="textbox" value="ThisisaString" /></li>
+		<li>Property Name2 : <input type="textbox" value=9 /></li>
+		<li>Property Name3: <select name="bool">
+			<option>True</option>
+			<option>False</option>
+			</select></li>
+		</ol>		
+	</div></li>
+	<input type="button" value="Create New Instance">
+	-->
+</ol>
+
+
+</div>
+
+
+
+
+</body>
+</html>
