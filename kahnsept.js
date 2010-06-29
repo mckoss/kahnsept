@@ -1,5 +1,7 @@
 namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     var util = namespace.util;
+    var base = namespace.lookup('org.startpad.base');
+    var format = namespace.lookup('org.startpad.format');
 
     // BUG: Kind of a hack - try to minimize the need for a global
     // world variable.
@@ -856,12 +858,54 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         }
     });
 
+    // Converts a string to a camel-case identifier (valid
+    // for property and schema names.
+    function camelize(s, fInitCap) {
+        // Add word breaks for every capital following a lower case
+        // letter.
+        var sSplit = "";
+        var isLastLower;
+        for (var i = 0; i < s.length; i++) {
+            var isLower = s[i] == s[i].toLowerCase();
+            if (isLastLower == undefined) {
+                isLastLower = isLower;
+            }
+            if (isLastLower && !isLower) {
+                sSplit += ' ';
+            }
+            sSplit += s[i];
+            isLastLower = isLower;
+        }
+
+        // Slugify the result.
+        s = format.slugify(sSplit);
+
+        // Convert slugified string to camelCase
+        var sOut = "";
+        var ich = 0;
+        var ichFind = s.indexOf('-', 0);
+        while (ichFind >= 0) {
+            sOut += s.substring(ich, ichFind) +
+                s[ichFind + 1].toUpperCase();
+            ich = ichFind + 2;
+            ichFind = s.indexOf('-', ich);
+        }
+        sOut += s.substring(ich);
+
+        if (fInitCap) {
+            sOut = sOut[0].toUpperCase() + sOut.substr(1);
+        }
+
+        return sOut;
+    }
+
     ns.extend({
         'Schema': Schema,
         'Property': Property,
         'BuiltIn': BuiltIn,
         'Instance': Instance,
         'Relationship': Relationship,
-        'World': World
+        'World': World,
+        'camelize': camelize
     });
 });

@@ -482,6 +482,21 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
         });
 
+        ts.addTest("camelize", function(ut) {
+            var tests = [
+                [' test ', 'test'],
+                ['test case', 'testCase'],
+                ['testCase', 'testCase'],
+                ['test case', 'TestCase', true],
+                ['this isA test case, my boy', 'thisIsATestCaseMyBoy'],
+                ['THIS is A test', 'thisIsATest']
+            ];
+
+            for (var i = 0; i < tests.length; i++) {
+                var test = tests[i];
+                ut.assertEq(kahnsept.camelize(test[0], test[2]), test[1]);
+            }
+        });
     }
 
     ns.addTests = addTests;
