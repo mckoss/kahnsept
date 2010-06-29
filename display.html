@@ -151,7 +151,14 @@ function selectSchema(schemaName) {
 };
 
 function deleteSchema() {
-	alert("Delete Schema method must be written in kahnsept.js before button can be hooked up");
+    if(selectedSchema instanceof kahnsept.BuiltIn) {
+        alert("thats a builtin schema- you can't delete it");
+    }
+    else {
+        world.deleteSchema(selectedSchema.name);
+        selectedSchema = world.schemas["Number"];
+        display();
+    }
 };
 
 function editProp(propName) {
