@@ -443,6 +443,13 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
             var i;
             var j;
+            var names = ['schemas', 'relationships'];
+            for (i = 0; i < names.length; i++) {
+                var name = names[i];
+                ut.assertEq(JSON.stringify(json[name]),
+                            JSON.stringify(json2[name]));
+            }
+
             for (j = 0; j < json2.instances.length; j++) {
                 var undefs = undefinedProps(json2.instances[j]);
                 ut.assertEq(undefs, undefined, undefs);
@@ -459,8 +466,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
                           "Key " + key + " not found.");
             }
 
-            //ut.assertEq(s, s3);
-        }).breakOn(-1);
+        });
 
     }
 
