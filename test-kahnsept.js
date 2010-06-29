@@ -61,6 +61,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assert(w.schemas['Test'] != undefined);
             w.deleteSchema('Test');
             ut.assertEq(w.schemas['Test'], undefined);
+            ut.assertEq(s.count, 0);
         });
 
         ts.addTest("Instances", function(ut) {

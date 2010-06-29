@@ -156,12 +156,19 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return this.addSchema(new Schema(schemaName));
         },
 
-        // Unlink a schema from a world.
+        // Unlink a schema from a world and remove all it's instances.
         deleteSchema: function(schemaName) {
             if (this.schemas[schemaName] == undefined) {
                 throw new Error("Schema " + schemaName + " does not exist.");
             }
             var schema = this.schemas[schemaName];
+            for (var i = 0; i < schema.instances.length; i++) {
+                var inst = schema.instances[i];
+                if (inst == undefined) {
+                    continue;
+                }
+                schema.deleteInstance(inst);
+            }
             schema.world = undefined;
             delete this.schemas[schemaName];
         },
