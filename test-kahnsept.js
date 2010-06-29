@@ -349,6 +349,11 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(p2.child.length, 1);
             ut.assertIdent(p1.child[0], c1);
             ut.assertIdent(p2.child[0], c2);
+
+            // Delete instance - remove all relationship properties
+            c2.deleteInstance();
+            ut.assertEq(p2.child.length, 0);
+            ut.assertEq(c2.parent, undefined);
         });
 
         ts.addTest("Many to Many", function(ut) {
