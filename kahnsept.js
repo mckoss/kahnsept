@@ -156,6 +156,16 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return this.addSchema(new Schema(schemaName));
         },
 
+        // Unlink a schema from a world.
+        deleteSchema: function(schemaName) {
+            if (this.schemas[schemaName] == undefined) {
+                throw new Error("Schema " + schemaName + " does not exist.");
+            }
+            var schema = this.schemas[schemaName];
+            schema.world = undefined;
+            delete this.schemas[schemaName];
+        },
+
         addSchema: function(schema) {
             if (this.schemas[schema.name] != undefined) {
                 throw new Error("Schema " + schema.name + " exists.");
