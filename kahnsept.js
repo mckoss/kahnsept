@@ -351,10 +351,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             // specific key.
             var inst = this.world.createInstance(this, values._key);
 
-            // Each new instance gets a unique (local) id number
-            this.instances[this.idNext] = inst;
-            this.count++;
-            inst._id = this.idNext++;
+            // Each new instance gets a unique (local) id number.
+            // Do not allocate an instance id if it's already registered.
+            if (inst._id == undefined) {
+                this.instances[this.idNext] = inst;
+                this.count++;
+                inst._id = this.idNext++;
+            }
 
             var name;
             var prop;
