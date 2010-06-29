@@ -471,6 +471,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("filter operator (" + op + ") not supported.");
             }
 
+            if (op == 'like') {
+                if (!(value instanceof RegExp)) {
+                    value = new RegExp(value);
+                }
+            }
+
             function test() {
                 return fn(this[propExp], value);
             }
@@ -501,7 +507,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 return a != b;
             },
             'contains': function(a, b) {
-                var s = a.toString();
+                var s = a.toString().toLowerCase();
+                b = b.toString().toLowerCase();
                 return s.indexOf(b) != -1;
             },
             'like': function(a, b) {

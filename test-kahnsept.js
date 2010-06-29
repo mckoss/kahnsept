@@ -139,6 +139,25 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(a.length, 2);
             ut.assertEq(a[0].n1, 3);
             ut.assertEq(a[1].n1, 4);
+
+            var fThrows = false;
+            try {
+                s.query().filter('n1 foo', 1);
+            } catch (e) {
+                fThrows = true;
+                ut.assertException(e, "operator (foo) not supported");
+            }
+            ut.assert(fThrows);
+
+            ut.assertEq(s.query().filter('n1 =', 2).count(), 1);
+            ut.assertEq(s.query().filter('n1 <=', 2).count(), 3);
+            ut.assertEq(s.query().filter('n1 >=', 2).count(), 8);
+            ut.assertEq(s.query().filter('n1 !=', 2).count(), 9);
+            ut.assertEq(s.query().filter('s1 contains', '1').count(), 1);
+            ut.assertEq(s.query().filter('s1 contains', 'Object').count(), 10);
+            ut.assertEq(s.query().filter('s1 contains', 'object').count(), 10);
+            ut.assertEq(s.query().filter('s1 like', /[02468]$/).count(), 5);
+            ut.assertEq(s.query().filter('s1 like', '[02468]$').count(), 5);
         });
 
         ts.addTest("Property type conversion", function(ut) {
