@@ -278,6 +278,20 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(obj.c1.y, 20);
         });
 
+        ts.addTest("Schema.renameProp", function(ut) {
+            var w = new kahnsept.World();
+            var t = w.createSchema('Test');
+            t.addProp("s1");
+
+            var obj = t.createInstance();
+            obj.setProp('s1', 'value');
+
+            ut.assertEq(obj.s1, 'value');
+            t.renameProp('s1', 's2');
+            ut.assertEq(obj.s1, undefined);
+            ut.assertEq(obj.s2, 'value');
+        });
+
         ts.addTest("Kahnsept Video Demo", function(ut) {
             var w = new kahnsept.World();
             var person = w.createSchema('Person');
@@ -315,7 +329,7 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(typeof s, 'string');
         });
 
-        ts.addTest("delProp", function(ut) {
+        ts.addTest("Schema.delProp", function(ut) {
             var w = new kahnsept.World();
             var person = w.createSchema('person');
             var address = w.createSchema('address');
@@ -325,7 +339,12 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assert(person.props['residence'] != undefined);
             ut.assert(address.props['person'] != undefined);
 
+            var p = person.createInstance('person');
+            var a = address.createInstance('address');
+            p.setProp('residence', a);
+            ut.assertIdent(p.residence, a);
             person.delProp('residence');
+            ut.assertEq(p.residence, undefined);
 
             ut.assertEq(person.props['residence'], undefined, 1);
             ut.assertEq(address.props['person'], undefined, 2);

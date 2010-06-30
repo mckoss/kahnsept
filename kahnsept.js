@@ -335,8 +335,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     });
 
     Schema.methods({
-        // Add a property to the Schema.  Handles BuiltIt properties
+        // Add a property to the Schema.  Handles BuiltIn properties
         // and shorthand for bi-directional Relationships.
+        //
+        // TODO: When adding a property with a default value, should
+        // update all existing instances with the default.
         addProp: function(name, schemaName, defaultValue, card) {
             if (schemaName == undefined) {
                 schemaName = 'String';
@@ -367,12 +370,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             this.props[name] = prop;
         },
 
-        // Remove a property from this schema.  Note that we don't
-        // not fix up any instances that may have been using this
-        // property.
-        //
-        // TODO: Should provide the option to clean up orphaned properties
-        // in Instances.
+        // Remove a property from this schema.  All instances
+        // have the values of this property removed.
         delProp: function(name, fOneOnly) {
             var prop = this.props[name];
             if (prop == undefined) {
@@ -382,6 +381,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (prop.relationship && !fOneOnly) {
                 prop.relationship.deleteProps();
                 return;
+            }
+            for (var i = 0; i < this.instances.length; i++) {
+                var inst = this.instances[i];
+                if (inst != undefined) {
+                    prop.removeValue(inst);
+                }
             }
             delete this.props[name];
         },
@@ -453,14 +458,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             for (var name in this.props) {
                 if (this.props.hasOwnProperty(name)) {
                     var prop = this.props[name];
-                    if (prop.card == 'one') {
-                        prop.removeValue(inst, inst[name]);
-                    }
-                    else {
-                        for (var i = 0; i < inst[name].length; i++) {
-                            prop.removeValue(inst, inst[name][i]);
-                        }
-                    }
+                    prop.removeValue(inst);
                 }
             }
             this.world.deleteInstance(inst);
@@ -726,20 +724,39 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return undefined;
         },
 
-        removeValue: function(instance, value, fOneOnly) {
-            var i = this.indexValue(instance, value);
+        // Remove a particular value from an instance property.
+        // If value == undefined, remove ALL values from the
+        // instance property.
+        removeValue: function(inst, value, fOneOnly) {
+            var i;
+
+            if (value == undefined) {
+                if (this.card == 'one') {
+                    if (inst[name] != undefined) {
+                        this.removeValue(inst, inst[name]);
+                    }
+                }
+                else {
+                    for (i = 0; i < inst[name].length; i++) {
+                        this.removeValue(inst, inst[name][i]);
+                    }
+                }
+                return;
+            }
+
+            i = this.indexValue(inst, value);
             if (i == undefined) {
                 return;
             } else if (i === true) {
-                delete instance[this.name];
+                delete inst[this.name];
             } else {
-                var values = instance[this.name];
+                var values = inst[this.name];
                 values.splice(i, 1);
             }
 
             if (this.relationship && !fOneOnly) {
                 var otherProp = this.relationship.otherProp(this);
-                otherProp.removeValue(value, instance, true);
+                otherProp.removeValue(value, inst, true);
             }
         },
 
@@ -757,13 +774,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return json;
         },
 
-        getJSON: function(instance) {
+        getJSON: function(inst) {
             if (this.card == 'one') {
-                return this.valueJSON(instance[this.name]);
+                return this.valueJSON(inst[this.name]);
             }
 
             var json = [];
-            var values = instance[this.name];
+            var values = inst[this.name];
             for (var i = 0; i < values.length; i++) {
                 json.push(this.valueJSON(values[i]));
             }
