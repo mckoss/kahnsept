@@ -79,6 +79,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     function Query(schema) {
         this.schema = schema;
         this.filters = [];
+        this.orders = [];
     }
 
     // Property - Defintion for a single property in an Schema.  Can
@@ -550,13 +551,35 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                     }
 
                     a.push(inst);
-                    if (--count <= 0) {
+
+                    // Can only early exit if we're returning an
+                    // unordered collection
+                    if (a.length == count && this.orders.length == 0) {
                         break;
                     }
                 }
             }
 
+            if (this.orders.length != 0) {
+                a.sort(this.fnOrder.fnMethod(this));
+            }
+
+            if (a.length > count) {
+                a = a.slice(0, count);
+            }
             return a;
+        },
+
+        fnOrder: function(a, b) {
+            var sgn;
+
+            for (var i = 0; i < this.orders.length; i++) {
+                sgn = this.orders[i](a, b);
+                if (sgn != 0) {
+                    return sgn;
+                }
+            }
+            return 0;
         },
 
         // Modify the current query to be filtered.
@@ -600,6 +623,20 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             }
 
             this.filters.push(test);
+            return this;
+        },
+
+        // Return query results in the given order.
+        // Usage:
+        //   query.order('prop') - Ascending
+        //   query.order('-prop') - Descending
+        //   query.order(fn) - An ordering function for two instances
+        //     fn(a,b): returns -1 (a < b), 0 (a == b), or 1 (a > b)
+        order: function(propExp) {
+            if (typeof propExp == 'function') {
+                this.orders.push(propExp);
+                return this;
+            }
             return this;
         }
     });
