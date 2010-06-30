@@ -618,7 +618,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 }
             }
 
+            // Use the current closure to preserve propExp, and value
             function test() {
+                // this === instance to test
                 return fn(this[propExp], value);
             }
 
@@ -637,6 +639,31 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 this.orders.push(propExp);
                 return this;
             }
+
+            var fReverse = propExp[0] == '-';
+            if (fReverse) {
+                propExp = propExp.substr(1);
+            }
+
+            // Use current closure to preserve propExp and fReverse
+            function compare(a, b) {
+                a = a[propExp];
+                b = b[propExp];
+                var sgn = 0;
+
+                if (a < b) {
+                    sgn = -1;
+                }
+                else if (a > b) {
+                    sgn = 1;
+                }
+                if (fReverse) {
+                    sgn = -sgn;
+                }
+                return sgn;
+            }
+
+            this.orders.push(compare);
             return this;
         }
     });
