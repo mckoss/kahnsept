@@ -95,9 +95,10 @@ function display() {
     
     
     for(i=0;i<instances.length;i++) {
+    	var instTitle = instances[i].getTitle();
         if(i == editingInstNum) {
         	instString += ('<li><div class="instance"><div class="editDeleteButtons"><input type="button" value="Save" onClick="saveInst();" />' +
-                    '<input type="button" value="Reset" onClick="resetInst();" /></div><h3>Instance '+i+'</h3><ol>');  
+                    '<input type="button" value="Reset" onClick="resetInst();" /></div><h3>'+instTitle+'</h3><ol>');  
             for(var propName in selectedSchema.props) {
                  var prop = selectedSchema.props[propName];
                  if(prop.schemaName == "String" || prop.schemaName == "Number") {
@@ -118,7 +119,17 @@ function display() {
                 	 instString += ('<li>'+prop.name+':  Date picker not yet implemented');
                  }
                  else {
-                	 instString += ('<li>'+prop.name+':  Instance-in-schema picker not yet implemented');
+                	 instString += ('<li>'+prop.name+':  <select id="'+propName+'field">');
+                	 for(var targetInst in world.schemas[prop.schemaName].instances) {
+                		    targetTitle = world.schemas[prop.schemaName].instances[targetInst].getTitle();
+                		    if(instances[i][prop.name] == targetTitle) {
+                		    	instString += ('<option value="'+targetTitle+'" selected="yes">'+targetTitle+'</option>');
+                		    }
+                		    else {
+                		    	  instString += ('<option value="'+targetTitle+'">'+targetTitle+'</option>');
+                		    }
+                     }
+                	 instString += ('</select>');
                  }
             }
             instString += ('</ol></div></li>');
@@ -126,7 +137,7 @@ function display() {
         else {
 	        instString += ('<li><div class="instance"><div class="editDeleteButtons"><input '+
 	    	        'type="button" value="Edit" onClick="editInst('+i+');" />' +
-	                '<input type="button" value="Delete" onClick="delInst('+i+');" /></div><h3>Instance '+i+'</h3><ol>');  
+	                '<input type="button" value="Delete" onClick="delInst('+i+');" /></div><h3>'+instTitle+'</h3><ol>');  
 	        for(var propName in selectedSchema.props) {
 	             var prop = selectedSchema.props[propName];
 	             instString += ('<li>'+prop.name+':  '+instances[i][prop.name]);
@@ -147,6 +158,8 @@ function createSchema() {
 
 function selectSchema(schemaName) {
 	selectedSchema = world.schemas[schemaName];
+    editingInstNum = null;
+    editingProp = null;
 	display();
 };
 
@@ -191,10 +204,15 @@ function editInst(instNum) {
 };
 
 function delInst(instNum) {
-    instances[instNum].deleteInstance();
-    var query = selectedSchema.query();
-    instances = query.fetch();
-    display();
+    if(editingInstNum != null && editingInstNum != instNum) {
+        alert('Save your other Instance before deleting this one');
+    }
+    else {
+	    instances[instNum].deleteInstance();
+	    var query = selectedSchema.query();
+	    instances = query.fetch();
+	    display();
+    }
 };
 
 function saveInst() {
