@@ -524,7 +524,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     Query.methods({
         // Number of Instances in the result (if fetch() where called).
         count: function() {
-            // TODO: Kind of wasteful to dispose of a potentially large array.
+            // Special case - unfiltered list - return count of
+            // instances.
+            if (this.filters.length == 0) {
+                return this.schema.count;
+            }
+
             return this.fetch().length;
         },
 
