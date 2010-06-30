@@ -732,13 +732,13 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
             if (value == undefined) {
                 if (this.card == 'one') {
-                    if (inst[name] != undefined) {
-                        this.removeValue(inst, inst[name]);
+                    if (inst[this.name] != undefined) {
+                        this.removeValue(inst, inst[this.name]);
                     }
                 }
                 else {
-                    for (i = 0; i < inst[name].length; i++) {
-                        this.removeValue(inst, inst[name][i]);
+                    for (i = 0; i < inst[this.name].length; i++) {
+                        this.removeValue(inst, inst[this.name][i]);
                     }
                 }
                 return;
