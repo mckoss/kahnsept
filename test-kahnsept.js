@@ -178,6 +178,16 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             inst = s.query().get();
             inst.deleteInstance();
             ut.assertEq(s.query().count(), 9);
+
+            function reverse(a, b) {
+                return b.n1 - a.n1;
+            }
+
+            a = s.query().order(reverse).fetch();
+            ut.assertEq(a.length, 9);
+            for (i = 0; i < a.length; i++) {
+                ut.assertEq(a[i].n1, 9 - i);
+            }
         });
 
         ts.addTest("Property type conversion", function(ut) {
