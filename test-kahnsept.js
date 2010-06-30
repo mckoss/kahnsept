@@ -188,6 +188,12 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             for (i = 0; i < a.length; i++) {
                 ut.assertEq(a[i].n1, 9 - i);
             }
+
+            a = s.query().order('-n1').fetch();
+            ut.assertEq(a.length, 9);
+            for (i = 0; i < a.length; i++) {
+                ut.assertEq(a[i].n1, 9 - i);
+            }
         });
 
         ts.addTest("Property type conversion", function(ut) {
