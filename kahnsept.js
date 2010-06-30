@@ -391,6 +391,27 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             delete this.props[name];
         },
 
+        // Rename a property - and all the instances.
+        renameProp: function(oldName, newName) {
+            newName = camelize(newName);
+            if (this.props[newName] != undefined) {
+                throw new Error("Property " + newName + " already exists.");
+            }
+            if (this.props[oldName] == undefined) {
+                throw new Error("No such property: " + oldName +
+                                " in " + this.name + ".");
+            }
+            this.props[newName] = this.props[oldName];
+            delete this.props[oldName];
+            for (var i = 0; i < this.instances.length; i++) {
+                var inst = this.instances[i];
+                if (inst != undefined && inst[oldName] != undefined) {
+                    inst[newName] = inst[oldName];
+                    delete inst[oldName];
+                }
+            }
+        },
+
         // Make an instance of the given Schema. Instances can be a
         // reference to and existing Instance, or a property value
         // descriptor (an Object containing property names and values to
