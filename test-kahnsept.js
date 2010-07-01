@@ -3,10 +3,8 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
     var base = namespace.lookup('org.startpad.base');
 
     var kahnseptClasses = ['Schema', 'Property', 'BuiltIn', 'Instance',
-                           'Relationship', 'World'
+                           'Relationship', 'World', 'camelize'
                           ];
-
-    var schemaMethods = ['addProp', 'delProp'];
 
     function addTests(ts) {
         ts.addTest("Exported Classes", function (ut) {
