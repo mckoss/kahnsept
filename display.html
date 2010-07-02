@@ -64,15 +64,23 @@ function display() {
 		var schemaDefStr = "";
 	    if(editingProp == propName) {
 	    	schemaDefStr += ('<div class="schemaDefinitionLine">Property Name:'+
-	    	    	' <input type="textbox" value="'+prop.name+'" id="propName" />Accepted Schema: '+ prop.schemaName);
-	    	
-	    	schemaDefStr += ('<div class="editDeleteButtons"><input type="button" value="Save" '+
+	    	    	' <input type="textbox" value="'+prop.name+'" id="propName" />Accepted Schema: '+ prop.schemaName +
+	    	    	' Card: <select id="propCard">');
+	    	if(prop.card == "one") {
+	    		schemaDefStr += ('<option value="one" selected="yes">one</option><option value="many">many</option>');
+	    	}
+	    	else if (prop.card == "many") {
+                schemaDefStr += ('<option value="one">one</option><option value="many" selected="yes">many</option>');
+            }
+	    	schemaDefStr += ('</select>Default: <input type="textbox" value="'+prop.defaultValue+'" id="propDefault" />'+
+	    	    	'<div class="editDeleteButtons"><input type="button" value="Save" '+
 	    	        'onclick="saveProp(\''+prop.name+'\');" /><input type="button" value="Reset" onClick="resetProp();" /></div></div>');
 	    }
 		else {
-		   schemaDefStr += ('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+
-                       '<div class="editDeleteButtons"><input type="button" value="Edit" onclick="editProp(\''+prop.name+
-                       '\');" /><input type="button" value="Delete" onClick="delProp(\''+prop.name+'\');" /></div></div>');
+		   schemaDefStr += ('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+ '---  Card: '+prop.card+ 
+				   ' Default: '+prop.defaultValue+
+                   '<div class="editDeleteButtons"><input type="button" value="Edit" onclick="editProp(\''+prop.name+
+                   '\');" /><input type="button" value="Delete" onClick="delProp(\''+prop.name+'\');" /></div></div>');
 		}
 	    $("#schemaDefinition").append(schemaDefStr);
     }
@@ -82,8 +90,10 @@ function display() {
         dropDownStr += ('<option value="'+schema.name+'">'+schema.name+'</option>');
     }
     dropDownStr += '</select>';
-	$("#schemaDefinition").append('<div class="schemaDefinitionLine"> New Property Name: <input type="textbox" id="newPropName">'+
-			' Accepted Schema: '+ dropDownStr + ' <input type="button" value="Add Property" onClick="addProp();" /></div>');
+	$("#schemaDefinition").append('<div class="schemaDefinitionLine"> newPropName: <input type="textbox" id="newPropName">'+
+			' acceptedSchema: '+ dropDownStr + ' Card:<select id="newPropCard"><option value="one">one</option><option value="many">'+
+			'many</option></select> Default: <input type="textbox" id="newPropDefault">'+
+			'<input type="button" value="Add Property" onClick="addProp();" /></div>');
     
     var instString = "<ol>";
     //$("#instanceBox").append("<ol>");
@@ -174,9 +184,11 @@ function deleteSchema() {
 };
 
 function addProp() {
-	newPropName = $("#newPropName").val();
-	newPropSchema = $("#newPropSchema").val();
-	selectedSchema.addProp(newPropName, newPropSchema);
+	var newPropName = $("#newPropName").val();
+	var newPropSchema = $("#newPropSchema").val();
+    var newPropCard = $("#newPropCard").val();
+    var newPropDefault = $("#newPropDefault").val();
+	selectedSchema.addProp(newPropName, newPropSchema, newPropDefault, newPropCard);
 	display();
 }
 
@@ -193,10 +205,10 @@ function delProp(propName) {
 };
 
 function saveProp(oldName) {
-    //selectedSchema.props[editingProp].name = $("#propName").val();
     var newName = $("#propName").val();
+    selectedSchema.props[oldName].card = $("#propCard").val();
+    selectedSchema.props[oldName].defaultValue = $("#propDefault").val();
     selectedSchema.renameProp(oldName, newName);
-
     editingProp = null;
     display();
 };
