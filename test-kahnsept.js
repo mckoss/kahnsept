@@ -472,7 +472,6 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
             var s = JSON.stringify(w.toJSON(), undefined, 4);
             ut.assertEq(typeof s, 'string');
-            console.log(s);
 
             var json = JSON.parse(s);
             var s2 = JSON.stringify(json, undefined, 4);
@@ -482,7 +481,6 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             w2.importJSON(json);
             var json2 = w2.toJSON();
             var s3 = JSON.stringify(json2, undefined, 4);
-            console.log(s3);
 
             ut.assertEq(json.schemas, json2.schemas);
             ut.assertEq(json.relationships, json2.relationships);
