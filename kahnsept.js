@@ -172,7 +172,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                                              this.cards[i],
                                              this);
                 this.names[i] = this.props[i].name;
-                this.schemas[i]._addProp(this.props[i]);
+                this.schemas[i]._addProperty(this.props[i]);
             }
             currentWorld.relationships.push(this);
         } catch (e) {
@@ -180,7 +180,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             // properties.
             for (i = 0; i < 2; i++) {
                 if (this.props[i]) {
-                    this.schemas[i].delProp(this.names[i], true);
+                    this.schemas[i].deleteProperty(this.names[i], true);
                     delete this.props[i];
                     delete this.schemas[i];
                 }
@@ -217,7 +217,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 schema.deleteInstance(inst);
             });
             base.forEach(schema.props, function(prop, propName) {
-                schema.delProp(propName);
+                schema.deleteProperty(propName);
             });
             schema.world = undefined;
             delete this.schemas[schemaName];
@@ -336,7 +336,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         //
         // TODO: When adding a property with a default value, should
         // update all existing instances with the default.
-        addProp: function(name, schemaName, defaultValue, card) {
+        addProperty: function(name, schemaName, defaultValue, card) {
             if (schemaName == undefined) {
                 schemaName = 'String';
             }
@@ -344,7 +344,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             if (schema instanceof BuiltIn) {
                 var prop = new Property(name, schemaName,
                                         defaultValue, card);
-                this._addProp(prop);
+                this._addProperty(prop);
             }
             else {
                 new Relationship(this.name, schemaName,
@@ -357,7 +357,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         },
 
         // Internal function to register a property in the Schema.
-        _addProp: function (prop) {
+        _addProperty: function (prop) {
             var name = prop.name;
             if (this.props[name]) {
                 throw new Error("Property " + name + " exists.");
@@ -368,14 +368,14 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
         // Remove a property from this schema.  All instances
         // have the values of this property removed.
-        delProp: function(name, fOneOnly) {
+        deleteProperty: function(name, fOneOnly) {
             var prop = this.props[name];
             if (prop == undefined) {
                 throw new Error("Property " + name + " does not exist in " +
                                 this.name);
             }
             if (prop.relationship && !fOneOnly) {
-                prop.relationship.deleteProps();
+                prop.relationship.deleteProperties();
                 return;
             }
             base.forEach(this.instances, function(inst) {
@@ -385,7 +385,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         },
 
         // Rename a property - and all the instances.
-        renameProp: function(oldName, newName) {
+        renameProperty: function(oldName, newName) {
             oldName = camelize(oldName);
             newName = camelize(newName);
             if (oldName == newName) {
@@ -506,7 +506,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var schema = currentWorld.createSchema(json.name);
 
             base.forEach(json.props, function(propJSON) {
-                schema._addProp(Property.fromJSON(propJSON));
+                schema._addProperty(Property.fromJSON(propJSON));
             });
         }
     });
@@ -896,10 +896,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return undefined;
         },
 
-        deleteProps: function() {
+        deleteProperties: function() {
             var i;
             for (i = 0; i < 2; i++) {
-                this.schemas[i].delProp(this.names[i], true);
+                this.schemas[i].deleteProperty(this.names[i], true);
             }
 
             var relationships = currentWorld.relationships;
@@ -931,7 +931,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     });
 
     Instance.methods({
-        setProp: function (name, value) {
+        setValue: function (name, value) {
             var prop = this._schema.props[name];
 
             if (prop == undefined) {
@@ -946,7 +946,7 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         setValues: function(values) {
             base.forEach(values, function(value, name) {
                 if (name[0] != '_') {
-                    this.setProp(name, value);
+                    this.setValue(name, value);
                 }
             }.fnMethod(this));
         },
