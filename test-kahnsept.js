@@ -301,9 +301,11 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             obj.setProp('s1', 'value');
 
             ut.assertEq(obj.s1, 'value');
+            ut.assert(t.props['s1'].name, 's1');
             t.renameProp('s1', 's2');
             ut.assertEq(obj.s1, undefined);
             ut.assertEq(obj.s2, 'value');
+            ut.assertEq(t.props['s2'].name, 's2');
         });
 
         ts.addTest("Kahnsept Video Demo", function(ut) {

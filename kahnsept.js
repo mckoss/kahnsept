@@ -402,8 +402,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("No such property: " + oldName +
                                 " in " + this.name + ".");
             }
-            this.props[newName] = this.props[oldName];
+            var prop = this.props[oldName];
             delete this.props[oldName];
+            this.props[newName] = prop;
+            prop.name = newName;
             for (var i = 0; i < this.instances.length; i++) {
                 var inst = this.instances[i];
                 if (inst != undefined && inst[oldName] != undefined) {
