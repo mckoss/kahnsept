@@ -205,12 +205,16 @@ function delProp(propName) {
 };
 
 function saveProp(oldName) {
-    var newName = $("#propName").val();
-    selectedSchema.props[oldName].card = $("#propCard").val();
-    selectedSchema.props[oldName].defaultValue = $("#propDefault").val();
-    selectedSchema.renameProp(oldName, newName);
-    editingProp = null;
-    display();
+    try {
+	    var newName = $("#propName").val();
+	    //selectedSchema.props[oldName].card = $("#propCard").val();
+	    selectedSchema.props[oldName].defaultValue = $("#propDefault").val();
+	    selectedSchema.renameProp(oldName, newName);
+	    editingProp = null;
+	    display();
+    } catch (e) {
+        alert(e.message);
+    }
 };
 
 function resetProp() {
