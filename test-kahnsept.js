@@ -51,10 +51,16 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             s.delProp('prop1');
             ut.assertEq(base.keys(s.props).length, 0);
 
+            var s2 = w.createSchema('Test2');
+            s.addProp('s2', 'Test2');
+            ut.assert(s.props['s2'] != undefined);
+            ut.assert(s2.props['test'] != undefined);
+
             ut.assert(w.schemas['Test'] != undefined);
             w.deleteSchema('Test');
             ut.assertEq(w.schemas['Test'], undefined);
             ut.assertEq(s.count, 0);
+            ut.assert(!s2.props.hasOwnProperty('test'), 'reference to deleted schema');
 
             ut.assertThrows("can't delete BuiltIn", function(ut) {
                 w.deleteSchema('Number');
