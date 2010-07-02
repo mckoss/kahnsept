@@ -63,20 +63,11 @@ function display() {
 		var prop = selectedSchema.props[propName];
 		var schemaDefStr = "";
 	    if(editingProp == propName) {
-		    var dropDownStr = "";
+
 	    	schemaDefStr += ('<div class="schemaDefinitionLine">Property Name:'+
-	    	    	' <input type="textbox" value="'+prop.name+'" id="propName" />Accepted Schema: <select>');
-	    	for(var key in world.schemas) {
-		    	var schema = world.schemas[key];
-	    		if(schema.name == prop.schemaName) {
-	    			dropDownStr += ('<option value="'+schema.name+'" selected="selected">'+schema.name+'</option>');
-	    		}
-	    		else {
-	    			dropDownStr += ('<option value="'+schema.name+'">'+schema.name+'</option>');
-	    		}
-	    	}
-	    	schemaDefStr += (dropDownStr);
-	    	schemaDefStr += ('</select><div class="editDeleteButtons"><input type="button" value="Save" '+
+	    	    	' <input type="textbox" value="'+prop.name+'" id="propName" />Accepted Schema: '+ prop.schemaName);
+	    	
+	    	schemaDefStr += ('<div class="editDeleteButtons"><input type="button" value="Save" '+
 	    	        'onclick="saveProp();" /><input type="button" value="Reset" onClick="resetProp();" /></div></div>');
 	    }
 		else {
@@ -86,6 +77,15 @@ function display() {
 		}
 	    $("#schemaDefinition").append(schemaDefStr);
     }
+    var dropDownStr = '<select id="newPropSchema">';
+    for(var key in world.schemas) {
+        var schema = world.schemas[key];
+        dropDownStr += ('<option value="'+schema.name+'">'+schema.name+'</option>');
+    }
+    dropDownStr += '</select>';
+	$("#schemaDefinition").append('<div class="schemaDefinitionLine"> New Property Name: <input type="textbox" id="newPropName">'+
+			' Accepted Schema: '+ dropDownStr + ' <input type="button" value="Add Property" onClick="addProp();" /></div>');
+    
     var instString = "<ol>";
     //$("#instanceBox").append("<ol>");
     
@@ -173,6 +173,13 @@ function deleteSchema() {
         display();
     }
 };
+
+function addProp() {
+	newPropName = $("#newPropName").val();
+	newPropSchema = $("#newPropSchema").val();
+	selectedSchema.addProp(newPropName, newPropSchema);
+	display();
+}
 
 function editProp(propName) {
     editingProp = propName;
