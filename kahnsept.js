@@ -394,7 +394,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
         // Rename a property - and all the instances.
         renameProp: function(oldName, newName) {
+            oldName = camelize(oldName);
             newName = camelize(newName);
+            if (oldName == newName) {
+                return;
+            }
             if (this.props[newName] != undefined) {
                 throw new Error("Property " + newName + " already exists.");
             }
