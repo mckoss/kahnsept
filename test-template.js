@@ -3,7 +3,7 @@ namespace.lookup('org.startpad.template.test')
     var template = namespace.lookup('org.startpad.template');
     var base = namespace.lookup('org.startpad.base');
 
-    var exports = ['render', 'evalVar'
+    var exports = ['Template', 'evalProp'
                   ];
 
     function addTests(ts) {
@@ -13,11 +13,12 @@ namespace.lookup('org.startpad.template.test')
             });
         });
 
-        ts.addTest("evalVar", function (ut) {
+        ts.addTest("evalProp", function (ut) {
+
 
         });
 
-        ts.addTest("render", function (ut) {
+        ts.addTest("Template.render", function (ut) {
 
         });
     }
