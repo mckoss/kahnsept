@@ -192,11 +192,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
     World.methods({
         // Initialize the World by creating all the built-in Schema types.
         init: function() {
-            for (var type in BuiltIn.types) {
-                if (BuiltIn.types.hasOwnProperty(type)) {
-                    this.addSchema(new BuiltIn(type));
-                }
-            }
+            base.forEach(BuiltIn.types, function(type, typeName) {
+                this.addSchema(new BuiltIn(typeName));
+            }.fnMethod(this));
         },
 
         // Add a new schema to the World.
@@ -204,7 +202,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             return this.addSchema(new Schema(schemaName));
         },
 
-        // Unlink a schema from a world and remove all it's instances.
+        // Unlink a schema from a world and remove all it's instances
+        // and references in other schema.
         deleteSchema: function(schemaName) {
             if (this.schemas[schemaName] == undefined) {
                 throw new Error("Schema " + schemaName + " does not exist.");
@@ -214,13 +213,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 throw new Error("Can't delete BuiltIn Schema " +
                                 schemaName + ".");
             }
-            for (var i = 0; i < schema.instances.length; i++) {
-                var inst = schema.instances[i];
-                if (inst == undefined) {
-                    continue;
-                }
+            base.forEach(schema.instances, function(inst) {
                 schema.deleteInstance(inst);
-            }
+            });
+            base.forEach(schema.props, function(propName, prop) {
+            });
             schema.world = undefined;
             delete this.schemas[schemaName];
         },
@@ -284,28 +281,21 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 instances: []
             };
 
-            for (var schemaName in this.schemas) {
-                if (this.schemas.hasOwnProperty(schemaName)) {
-                    var schema = this.schemas[schemaName];
-                    // Don't bother to serialize the built-in Schema
-                    if (schema instanceof BuiltIn) {
-                        continue;
-                    }
-                    json.schemas.push(schema.toJSON());
+            base.forEach(this.schemas, function(schema) {
+                // Don't bother to serialize the built-in Schema
+                if (schema instanceof BuiltIn) {
+                    return;
                 }
-            }
+                json.schemas.push(schema.toJSON());
+            });
 
-            for (i = 0; i < this.relationships.length; i++) {
-                var relationship = this.relationships[i];
+            base.forEach(this.relationships, function(relationship) {
                 json.relationships.push(relationship.toJSON());
-            }
+            });
 
-            for (var key in this.instances) {
-                if (this.instances.hasOwnProperty(key)) {
-                    var instance = this.instances[key];
-                    json.instances.push(instance.toJSON());
-                }
-            }
+            base.forEach(this.instances, function(instance) {
+                json.instances.push(instance.toJSON());
+            });
             return json;
         },
 
@@ -387,12 +377,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 prop.relationship.deleteProps();
                 return;
             }
-            for (var i = 0; i < this.instances.length; i++) {
-                var inst = this.instances[i];
-                if (inst != undefined) {
-                    prop.removeValue(inst);
-                }
-            }
+            base.forEach(this.instances, function(inst) {
+                prop.removeValue(inst);
+            });
             delete this.props[name];
         },
 
@@ -414,13 +401,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             delete this.props[oldName];
             this.props[newName] = prop;
             prop.name = newName;
-            for (var i = 0; i < this.instances.length; i++) {
-                var inst = this.instances[i];
-                if (inst != undefined && inst[oldName] != undefined) {
+            base.forEach(this.instances, function(inst) {
+                if (inst[oldName] != undefined) {
                     inst[newName] = inst[oldName];
                     delete inst[oldName];
                 }
-            }
+            });
         },
 
         // Make an instance of the given Schema. Instances can be a
@@ -487,12 +473,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         // properties, and remove from the instance maps in the World
         // and Schema.
         deleteInstance: function(inst) {
-            for (var name in this.props) {
-                if (this.props.hasOwnProperty(name)) {
-                    var prop = this.props[name];
-                    prop.removeValue(inst);
-                }
-            }
+            base.forEach(this.props, function(prop) {
+                prop.removeValue(inst);
+            });
             this.world.deleteInstance(inst);
             delete this.instances[inst._id];
             this.count--;
@@ -508,14 +491,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 'props': []
             };
 
-            for (var propName in this.props) {
-                if (this.props.hasOwnProperty(propName)) {
-                    var prop = this.props[propName];
-                    if (!prop.relationship) {
-                        json.props.push(prop.toJSON());
-                    }
+            base.forEach(this.props, function(prop) {
+                if (!prop.relationship) {
+                    json.props.push(prop.toJSON());
                 }
-            }
+            });
             return json;
         }
     });
@@ -524,10 +504,9 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         fromJSON: function (json) {
             var schema = currentWorld.createSchema(json.name);
 
-            for (var i = 0; i < json.props.length; i++) {
-                var propName = json.props[i].name;
-                schema._addProp(Property.fromJSON(json.props[i]));
-            }
+            base.forEach(json.props, function(propJSON) {
+                schema._addProp(Property.fromJSON(propJSON));
+            });
         }
     });
 
@@ -555,25 +534,21 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             var a = [];
             var instances = this.schema.instances;
 
-            instanceLoop:
-            for (var i = 1; i < instances.length; i++) {
-                if (instances[i] != undefined) {
-                    var inst = instances[i];
-                    for (var j = 0; j < this.filters.length; j++) {
-                        if (!this.filters[j].call(inst)) {
-                            continue instanceLoop;
-                        }
-                    }
-
-                    a.push(inst);
-
-                    // Can only early exit if we're returning an
-                    // unordered collection
-                    if (a.length == count && this.orders.length == 0) {
-                        break;
+            base.forEach(instances, function(inst) {
+                for (var j = 0; j < this.filters.length; j++) {
+                    if (!this.filters[j].call(inst)) {
+                        return;
                     }
                 }
-            }
+
+                a.push(inst);
+
+                // Can only early exit if we're returning an
+                // unordered collection
+                if (a.length == count && this.orders.length == 0) {
+                    return false;
+                }
+            }.fnMethod(this));
 
             if (this.orders.length != 0) {
                 a.sort(this.fnOrder.fnMethod(this));
@@ -968,11 +943,11 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
 
         // Set one or more values defined in values Object
         setValues: function(values) {
-            for (var name in values) {
-                if (values.hasOwnProperty(name) && name[0] != '_') {
-                    this.setProp(name, values[name]);
+            base.forEach(values, function(value, name) {
+                if (name[0] != '_') {
+                    this.setProp(name, value);
                 }
-            }
+            }.fnMethod(this));
         },
 
         getTitle: function() {
@@ -993,15 +968,12 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
                 '_key': this._key
             };
 
-            for (var propName in schema.props) {
-                if (schema.props.hasOwnProperty(propName)) {
-                    var prop = schema.props[propName];
-                    var value = prop.getJSON(this);
-                    if (value != undefined) {
-                        json[propName] = value;
-                    }
+            base.forEach(schema.props, function(prop, propName) {
+                var value = prop.getJSON(this);
+                if (value != undefined) {
+                    json[propName] = value;
                 }
-            }
+            }.fnMethod(this));
             return json;
         }
     });
