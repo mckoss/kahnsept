@@ -35,14 +35,9 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
 
             // Expect Errors - Test - Properties cannot be added without
             // type
-            var fThrows = false;
-            try {
+            ut.assertThrows("Invalid schema", function(ut) {
                 s.addProp('prop1', 'Bogus');
-            } catch (e) {
-                fThrows = true;
-                ut.assertException(e, "Invalid schema");
-            }
-            ut.assert(fThrows);
+            });
 
             s.addProp('prop1', 'String');
             // Property successfuly added
@@ -61,14 +56,9 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(w.schemas['Test'], undefined);
             ut.assertEq(s.count, 0);
 
-            fThrows = false;
-            try {
+            ut.assertThrows("can't delete BuiltIn", function(ut) {
                 w.deleteSchema('Number');
-            } catch (e2) {
-                fThrows = true;
-                ut.assertException(e2, "can't delete BuiltIn");
-            }
-            ut.assert(fThrows, "delete BuiltIn");
+            });
         });
 
         ts.addTest("Instances", function(ut) {
@@ -103,14 +93,9 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertIdent(obj.d1.constructor, Date);
             ut.assertEq(obj.d1.getTime(), d.getTime());
 
-            var fThrows = false;
-            try {
+            ut.assertThrows("does not exist", function(ut) {
                 obj.setProp("missing", 1);
-            } catch (e) {
-                fThrows = true;
-                ut.assertException(e, "does not exist");
-            }
-            ut.assert(fThrows);
+            });
         });
 
         ts.addTest("Schema.query", function(ut) {
@@ -154,14 +139,9 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
             ut.assertEq(a[0].n1, 3);
             ut.assertEq(a[1].n1, 4);
 
-            var fThrows = false;
-            try {
+            ut.assertThrows("operator (foo) not supported", function(ut) {
                 s.query().filter('n1 foo', 1);
-            } catch (e) {
-                fThrows = true;
-                ut.assertException(e, "operator (foo) not supported");
-            }
-            ut.assert(fThrows);
+            });
 
             ut.assertEq(s.query().filter('n1 =', 2).count(), 1);
             ut.assertEq(s.query().filter('n1 <=', 2).count(), 3);
@@ -529,6 +509,10 @@ namespace.lookup('com.pageforest.kahnsept.test').defineOnce(function (ns) {
                 var test = tests[i];
                 ut.assertEq(kahnsept.camelize(test[0], test[2]), test[1]);
             }
+
+            ut.assertThrows("Illegal name", function(ut) {
+                kahnsept.camelize('');
+            });
         });
     }
 

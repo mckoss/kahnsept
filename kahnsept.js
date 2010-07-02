@@ -46,6 +46,10 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
         // Slugify the result.
         s = format.slugify(sSplit);
 
+        if (s == '') {
+            throw new Error("Illegal name: <empty string>.");
+        }
+
         // Convert slugified string to camelCase
         var sOut = "";
         var ich = 0;
