@@ -63,12 +63,11 @@ function display() {
 		var prop = selectedSchema.props[propName];
 		var schemaDefStr = "";
 	    if(editingProp == propName) {
-
 	    	schemaDefStr += ('<div class="schemaDefinitionLine">Property Name:'+
 	    	    	' <input type="textbox" value="'+prop.name+'" id="propName" />Accepted Schema: '+ prop.schemaName);
 	    	
 	    	schemaDefStr += ('<div class="editDeleteButtons"><input type="button" value="Save" '+
-	    	        'onclick="saveProp();" /><input type="button" value="Reset" onClick="resetProp();" /></div></div>');
+	    	        'onclick="saveProp(\''+prop.name+'\');" /><input type="button" value="Reset" onClick="resetProp();" /></div></div>');
 	    }
 		else {
 		   schemaDefStr += ('<div class="schemaDefinitionLine">'+prop.name+' : '+prop.schemaName+
@@ -193,9 +192,11 @@ function delProp(propName) {
 	display();
 };
 
-function saveProp() {
+function saveProp(oldName) {
     //selectedSchema.props[editingProp].name = $("#propName").val();
-    alert("need to implement property rename function in kahnsept.js");
+    var newName = $("#propName").val();
+    selectedSchema.renameProp(oldName, newName);
+
     editingProp = null;
     display();
 };
