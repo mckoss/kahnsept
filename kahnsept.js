@@ -216,7 +216,8 @@ namespace.lookup('com.pageforest.kahnsept').defineOnce(function (ns) {
             base.forEach(schema.instances, function(inst) {
                 schema.deleteInstance(inst);
             });
-            base.forEach(schema.props, function(propName, prop) {
+            base.forEach(schema.props, function(prop, propName) {
+                schema.delProp(propName);
             });
             schema.world = undefined;
             delete this.schemas[schemaName];
