@@ -14,17 +14,24 @@ namespace.lookup('org.startpad.template.test')
         });
 
         ts.addTest("evalProp", function (ut) {
-            var tests = [
-                ['a', 1],
-                ['b', 2]
-            ];
+            var x = {'z': 5};
+            var y = {'z': 5};
             var obj = {
                 'a': 1,
                 'b': 2,
                 'c': {
                     'd': 3
-                }
+                },
+                'e': [x, y]
             };
+
+            var tests = [
+                ['a', 1],
+                ['b', 2],
+                ['c.d', 3],
+                ['e.z', 5]
+            ];
+
             base.forEach(tests, function(test) {
                 ut.assertEq(template.evalProp(test[0], obj),
                             test[1]);
