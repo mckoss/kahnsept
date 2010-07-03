@@ -178,7 +178,7 @@ namespace.lookup('com.pageforest.kahnsept.browser').defineOnce(function(ns) {
                 instString += ('</ol></div></li>');
             }
         }
-        instString += ('<br><input type="button" value="Create New Instance" onclick="browser.createInst() />');
+        instString += ('<br><input type="button" value="Create New Instance" onclick="browser.createInst();" />');
         $("#instanceBox").append(instString);
     };
     function createSchema() {
