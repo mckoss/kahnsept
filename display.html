@@ -25,7 +25,6 @@ $(document).ready(browser.onReady);
 
 <script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-5597/?callback=browser.loadDatabase"></script>
 <style>
-
 div.schemalist {
 background-color:#00FF00;
 width:150px;
@@ -75,75 +74,18 @@ div.instance {
 background-color:#0000FF;
 
 }
-
 </style>
 </head>
+
 <body>
 
+<div class="schemalist" id="schemaList"></div>
 
-<div class="schemalist" id="schemaList">
+<div class="schemaDefinitionTitle" id="defTitle"></div>
 
-</div>
+<div class="schemaDefinition" id="schemaDefinition"></div>
 
-<div class="schemaDefinitionTitle" id="defTitle">
-
-</div>
-
-<div class="schemaDefinition" id="schemaDefinition">
-
-
-
-
-
-</div>
-
-<div class="instanceBox" id="instanceBox">
-
-    <!--
-    <li><div class="instance">
-        <div class="editDeleteButtons">
-            <input type="button" value="Save" />
-            <input type="button" value="Reset" />
-        </div>
-        <h3>Instance 3 Name</h3>
-        <ol><li>Relationship 1 Name: <select name="rel1">
-            <option>Schema1</option>
-            <option>Schema2</option>
-            <option>Schema3</option>
-            <option>Schema4</option>
-            <option>Schema5</option>
-            </select>
-            <select name="rel1">
-            <option>Schema1</option>
-            <option>Schema2</option>
-            <option>Schema3</option>
-            <option>Schema4</option>
-            <option>Schema5</option>
-            </select></li>
-        <li>Relationship 2 Name : <select name="rel2">
-            <option>Schema1</option>
-            <option>Schema2</option>
-            <option>Schema3</option>
-            <option>Schema4</option>
-            <option>Schema5</option>
-            </select></li>
-        <li>Property Name : <input type="textbox" value="ThisisaString" /></li>
-        <li>Property Name2 : <input type="textbox" value=9 /></li>
-        <li>Property Name3: <select name="bool">
-            <option>True</option>
-            <option>False</option>
-            </select></li>
-        </ol>
-    </div></li>
-    <input type="button" value="Create New Instance">
-    -->
-</ol>
-
-
-</div>
-
-
-
+<div class="instanceBox" id="instanceBox"></div>
 
 </body>
 </html>
