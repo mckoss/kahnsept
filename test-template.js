@@ -39,7 +39,18 @@ namespace.lookup('org.startpad.template.test')
         });
 
         ts.addTest("Template.render", function (ut) {
+            var t = new template.Template("My name is {{ myName }}.");
+            var obj = {'myName': "Mike"};
+            ut.assertEq(t.render(obj), "My name is Mike.");
 
+            t = new template.Template("I live in {{ address.state }} state.");
+            obj = {
+                address: {
+                    street: "3614 Hunts Point Road",
+                    state: "WA"
+                }
+            };
+            ut.assertEq(t.render(obj), "I live in WA state.");
         });
     }
 
