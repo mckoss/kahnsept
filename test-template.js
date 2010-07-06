@@ -38,7 +38,7 @@ namespace.lookup('org.startpad.template.test')
             });
         });
 
-        ts.addTest("Template.render", function (ut) {
+        ts.addTest("Template.render - variable", function (ut) {
             var t = new template.Template("My name is {{ myName }}.");
             var obj = {'myName': "Mike"};
             ut.assertEq(t.render(obj), "My name is Mike.");
@@ -51,6 +51,20 @@ namespace.lookup('org.startpad.template.test')
                 }
             };
             ut.assertEq(t.render(obj), "I live in WA state.");
+        });
+
+        ts.addTest("Template.render - for", function (ut) {
+            ut.assertThrows("Missing closing tag 'endfor'",
+                function(ut) {
+                    var t = new template.Template("{% for var in list %}var");
+                });
+            ut.assertThrows("Tag 'endfor' without matching 'for'", function(ut) {
+                var t = new template.Template("var{% endfor %}");
+            });
+            var t = new template.Template(
+                "{% for var in list %}{{ var }}{% endfor %}");
+            var list = [1, 2, 'hello', 3];
+            ut.assertEq(t.render({'list': list}), "12hello3");
         });
     }
 

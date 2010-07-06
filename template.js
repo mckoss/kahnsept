@@ -5,6 +5,7 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
 
     // General purpose template evaluation.
     function Template(source) {
+        this.stack = [];
         this.parse(source);
         return this;
     }
@@ -18,17 +19,31 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
     Template.methods({
         'parse': function(source) {
             this.source = source;
-            this.top = new Node('block');
-            this.current = this.top;
-            this.stack = [];
+            this.root = new Node('block');
+
+            this.pushNode(this.root);
             this.ich = 0;
             while (this.ich < source.length) {
                 this.nextToken();
             }
-            if (this.stack.length != 0) {
-                throw new Error("Missing closing token for " +
-                                this.stack[this.stack.length - 1].type + ".");
+
+            if (this.stack.length != 1) {
+                throw new Error("Missing closing tag 'end" +
+                                this.stack[this.stack.length - 1].type + "'.");
             }
+        },
+
+        pushNode: function(node) {
+            this.stack.push(node);
+            if (this.current) {
+                this.current.nodes.push(node);
+            }
+            this.current = node;
+        },
+
+        popNode: function() {
+            this.stack.pop();
+            this.current = this.stack[this.stack.length - 1];
         },
 
         'nextToken': function() {
@@ -58,7 +73,41 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
                 break;
 
             case '%':
-                throw new Error("Don't support blocks, yet.");
+                ichEnd = this.source.indexOf('%}', ichToken + 2);
+                if (ichEnd == -1) {
+                    throw new Error("Unbalanced token at " + ichToken);
+                }
+                var blockExp = this.source.substring(ichToken + 2, ichEnd);
+                blockExp = base.strip(blockExp);
+                this.ich = ichEnd + 2;
+
+                var terms = blockExp.split(/ +/);
+                switch (terms[0]) {
+                case 'for':
+                    if (terms[2] != 'in') {
+                        throw new Error("Syntax error: for var *in* list.");
+                    }
+                    var node = new Node('for', terms[1]);
+                    node.listExpr = terms[3];
+                    this.pushNode(node);
+                    break;
+
+                case 'endfor':
+                    if (this.current.type != 'for') {
+                        throw new Error(
+                            "Tag 'endfor' without matching 'for' tag.");
+                    }
+                    this.popNode();
+                    break;
+
+                case 'block':
+                    throw new Error("Blocks NYI.");
+
+                default:
+                    throw new Error("Unrecognized block type: " +
+                                    terms[0] + ".");
+                }
+                break;
 
             default:
                 this.current.addNode('text',
@@ -70,19 +119,35 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
         },
 
         'render': function(obj) {
-            return this.top.render(obj);
+            return this.root.render(obj);
         }
     });
 
     Node.methods({
         'render': function(obj) {
+            var s = "";
+
             switch (this.type) {
             case 'text':
                 return this.content;
+
             case 'var':
                 return ns.evalProp(this.content, obj);
+
+            case 'for':
+                var list = ns.evalProp(this.listExpr, obj);
+                if (!list instanceof Array) {
+                    list = [list];
+                }
+                base.forEach(list, function(value) {
+                    obj[this.content] = value;
+                    base.forEach(this.nodes, function(node) {
+                        s += node.render(obj);
+                    });
+                }.fnMethod(this));
+                return s;
+
             case 'block':
-                var s = "";
                 base.forEach(this.nodes, function(node) {
                     s += node.render(obj);
                 });
