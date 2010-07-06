@@ -1,5 +1,6 @@
 namespace.lookup('com.pageforest.kahnsept.browser').defineOnce(function(ns) {
     var kahnsept = namespace.lookup("com.pageforest.kahnsept");
+    var template = namespace.lookup("org.startpad.template");
     var base = namespace.lookup("org.startpad.base");
 
     var world = new kahnsept.World();
@@ -7,6 +8,14 @@ namespace.lookup('com.pageforest.kahnsept.browser').defineOnce(function(ns) {
     var editingProp = null;
     var editingInstNum = null;
     var instances = [];
+
+    var definitionHeader = new template.Template(
+        '<h3 style="width:750px; height:45px; float:left;">\n' +
+        '  {{ schema.name}} Definition</h3>\n' +
+        '<div style="float:left; margin-top:15px;">\n' +
+        '<input type="button" value="Delete" \n' +
+        '       onclick="browser.deleteSchema();" />\n' +
+            '</div>\n');
 
     function loadDatabase(json) {
         world.importJSON(json.blob);
@@ -40,12 +49,8 @@ namespace.lookup('com.pageforest.kahnsept.browser').defineOnce(function(ns) {
         $("#schemaDefinition").empty();
         var prop;
 
-        $("#defTitle").
-        append('<h3 style="width:750px; height:45px; float:left;">' +
-               selectedSchema.name + ' Definition</h3>' +
-               '<div style="float:left; margin-top:15px;">' +
-               '<input type="button" value="Delete" ' +
-               'onclick="browser.deleteSchema();" /></div>');
+        var s = definitionHeader.render({'schema': selectedSchema});
+        $("#defTitle").append(s);
 
         for (var propName in selectedSchema.props) {
             prop = selectedSchema.props[propName];
