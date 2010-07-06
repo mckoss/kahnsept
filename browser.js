@@ -17,6 +17,19 @@ namespace.lookup('com.pageforest.kahnsept.browser').defineOnce(function(ns) {
         '       onclick="browser.deleteSchema();" />\n' +
             '</div>\n');
 
+    var displayPropDef = new template.Template(
+        '<div class="schemaDefinitionLine">' +
+        '  {{ prop.name }}: {{ prop.schemaName }}' +
+        '  ---  Card: {{ prop.card}}' +
+        '  Default: {{ prop.defaultValue }}' +
+        '  <div class="editDeleteButtons">' +
+        '    <input type="button" value="Edit"' +
+        '           onclick="browser.editProp(\'{{ prop.name }}\');"/>' +
+        '    <input type="button" value="Delete"' +
+        '           onclick="browser.delProp(\'{{ prop.name }}\');"/>' +
+        '  </div>' +
+        '</div>');
+
     function loadDatabase(json) {
         world.importJSON(json.blob);
         selectedSchema = world.schemas["Person"];
@@ -126,14 +139,7 @@ namespace.lookup('com.pageforest.kahnsept.browser').defineOnce(function(ns) {
                     'onclick="browser.resetProp();" /></div></div>';
             }
             else {
-                schemaDefStr += ('<div class="schemaDefinitionLine">' +
-                        prop.name + ' : ' + prop.schemaName + '---  Card: ' +
-                        prop.card + ' Default: ' + prop.defaultValue +
-                        '<div class="editDeleteButtons"><input type="button"' +
-                        'value="Edit" onclick="browser.editProp(\'' +
-                        prop.name + '\');" /><input type="button" ' +
-                        'value="Delete" onclick="browser.delProp(\'' +
-                        prop.name + '\');" /></div></div>');
+                schemaDefStr += displayPropDef.render({'prop': prop});
             }
             $("#schemaDefinition").append(schemaDefStr);
         }
