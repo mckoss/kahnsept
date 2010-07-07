@@ -4,15 +4,15 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
     var format = namespace.lookup('org.startpad.format');
 
     var standardFilters = {
-        'safe': function(s, obj, node) {
+        'safe': function(s, context, node) {
             node.isSafe = true;
             return s;
         }
     };
 
     // General purpose template evaluation.
-    function Template(source) {
-        this.filters = standardFilters;
+    function Template(source, filters) {
+        this.filters = base.extendObject({}, standardFilters, filters);
         this.stack = [];
         this.parse(source);
         return this;
@@ -151,13 +151,13 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
             }
         },
 
-        'render': function(obj) {
-            return this.root.render(obj);
+        'render': function(context) {
+            return this.root.render(context);
         }
     });
 
     Node.methods({
-        'render': function(obj) {
+        'render': function(context) {
             var s = "";
 
             switch (this.type) {
@@ -165,9 +165,9 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
                 return this.content;
 
             case 'var':
-                s = ns.evalProp(this.content, obj);
+                s = ns.evalProp(this.content, context);
                 base.forEach(this.filters, function(filter) {
-                    s = filter(s, obj, this);
+                    s = filter(s, context, this);
                 }.fnMethod(this));
                 if (!this.isSafe) {
                     s = format.escapeHTML(s);
@@ -175,21 +175,21 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
                 return s;
 
             case 'for':
-                var list = ns.evalProp(this.listExpr, obj);
+                var list = ns.evalProp(this.listExpr, context);
                 if (!list instanceof Array) {
                     list = [list];
                 }
                 base.forEach(list, function(value) {
-                    obj[this.content] = value;
+                    context[this.content] = value;
                     base.forEach(this.nodes, function(node) {
-                        s += node.render(obj);
+                        s += node.render(context);
                     });
                 }.fnMethod(this));
                 return s;
 
             case 'block':
                 base.forEach(this.nodes, function(node) {
-                    s += node.render(obj);
+                    s += node.render(context);
                 });
                 return s;
             }
@@ -204,10 +204,10 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
 
     // Evaluate the property expression in the context of the
     // object.  Returns an array of values.
-    function evalProp(propExp, obj) {
+    function evalProp(propExp, context) {
         var parts = propExp.split('.');
         // Successively refine result array (can be multi-value)
-        var res = [obj];
+        var res = [context];
         // Evaluate each property reference in turn
         base.forEach(parts, function(part) {
             var resNext = [];
