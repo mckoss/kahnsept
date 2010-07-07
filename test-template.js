@@ -53,6 +53,16 @@ namespace.lookup('org.startpad.template.test')
             ut.assertEq(t.render(obj), "I live in WA state.");
         });
 
+        ts.addTest("Template.render - html escaping", function (ut) {
+            var t = new template.Template("My name is {{ myName }}.");
+            var obj = {'myName': "Mike <script>alert(1);</script>"};
+            ut.assertEq(t.render(obj),
+                "My name is Mike &lt;script&gt;alert(1);&lt;/script&gt;.");
+            t = new template.Template("My name is {{ myName|safe }}.");
+            ut.assertEq(t.render(obj),
+                "My name is Mike <script>alert(1);</script>.");
+        });
+
         ts.addTest("Template.render - for", function (ut) {
             ut.assertThrows("Missing closing tag 'endfor'",
                 function(ut) {

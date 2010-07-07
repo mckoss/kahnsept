@@ -3,8 +3,16 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
     var base = namespace.lookup('org.startpad.base');
     var format = namespace.lookup('org.startpad.format');
 
+    var standardFilters = {
+        'safe': function(s, obj, node) {
+            node.isSafe = true;
+            return s;
+        }
+    };
+
     // General purpose template evaluation.
     function Template(source) {
+        this.filters = standardFilters;
         this.stack = [];
         this.parse(source);
         return this;
@@ -13,6 +21,7 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
     function Node(type, content) {
         this.type = type;
         this.content = content;
+        this.isSafe = false;
         this.nodes = [];
     }
 
@@ -49,6 +58,7 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
         'nextToken': function() {
             var ichEnd;
             var ichToken = this.source.indexOf('{', this.ich);
+            var node;
 
             if (ichToken == -1) {
                 ichToken = this.source.length;
@@ -62,13 +72,36 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
             }
             switch (this.source[ichToken + 1]) {
             case '{':
+                var filters;
+
                 ichEnd = this.source.indexOf('}}', ichToken + 2);
                 if (ichEnd == -1) {
                     throw new Error("Unbalanced token at " + ichToken);
                 }
                 var propName = this.source.substring(ichToken + 2, ichEnd);
                 propName = base.strip(propName);
-                this.current.addNode('var', propName);
+
+                // Parse any filters given
+                if (propName.indexOf('|') != -1) {
+                    var parts = propName.split('|');
+                    propName = parts[0];
+                    filters = parts.slice(1);
+                    base.forEach(filters, function(filter, i) {
+                        var fn = this.filters[filter];
+                        if (fn == undefined) {
+                            throw new Error("No such filter: '" +
+                                            filter + "'.");
+                        }
+                        filters[i] = fn;
+                    }.fnMethod(this));
+                }
+
+                node = this.current.addNode('var', propName);
+
+                if (filters) {
+                    node.filters = filters;
+                }
+
                 this.ich = ichEnd + 2;
                 break;
 
@@ -87,7 +120,7 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
                     if (terms[2] != 'in') {
                         throw new Error("Syntax error: for var *in* list.");
                     }
-                    var node = new Node('for', terms[1]);
+                    node = new Node('for', terms[1]);
                     node.listExpr = terms[3];
                     this.pushNode(node);
                     break;
@@ -132,7 +165,14 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
                 return this.content;
 
             case 'var':
-                return ns.evalProp(this.content, obj);
+                s = ns.evalProp(this.content, obj);
+                base.forEach(this.filters, function(filter) {
+                    s = filter(s, obj, this);
+                }.fnMethod(this));
+                if (!this.isSafe) {
+                    s = format.escapeHTML(s);
+                }
+                return s;
 
             case 'for':
                 var list = ns.evalProp(this.listExpr, obj);
@@ -156,7 +196,9 @@ namespace.lookup('org.startpad.template').defineOnce(function (ns) {
         },
 
         'addNode': function(type, content) {
-            this.nodes.push(new Node(type, content));
+            var node = new Node(type, content);
+            this.nodes.push(node);
+            return node;
         }
     });
 
